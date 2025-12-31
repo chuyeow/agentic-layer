@@ -1,0 +1,110 @@
+# ------------------------------------------------------------------------------
+# Git
+# ------------------------------------------------------------------------------
+
+prefix_rule(pattern=["git", "add"], decision="allow")
+
+prefix_rule(
+    pattern = ["git", "commit"],
+    decision = "allow",
+    match = ["git commit -m test"],
+)
+
+prefix_rule(
+    pattern = ["git", ["status", "diff", "log", "show", "blame"]],
+    decision = "allow"
+)
+
+# Push: allow safe pushes; prompt for force.
+prefix_rule(
+    pattern = ["git", "push", "--force"],
+    decision = "prompt",
+)
+prefix_rule(
+    pattern = ["git", "push", "--force-with-lease"],
+    decision = "prompt",
+)
+prefix_rule(
+    pattern = ["git", "push", "-f"],
+    decision = "prompt",
+)
+prefix_rule(
+    pattern = ["git", "push"],
+    decision = "allow",
+    match = [
+        "git push",
+        "git push origin HEAD",
+        "git push --set-upstream origin feature/foo",
+    ],
+)
+
+# Branch switching/creation: prompt
+prefix_rule(
+    pattern = ["git", ["checkout", "switch"]],
+    decision = "prompt",
+    match = [
+        "git checkout feature/foo",
+        "git switch -c feature/foo",
+    ],
+)
+
+# Branch deletion: prompt
+prefix_rule(
+    pattern = ["git", "branch", ["-d", "-D"]],
+    decision = "prompt",
+    match = [
+        "git branch -d feature/foo",
+        "git branch -D feature/foo",
+    ],
+)
+
+# Destructive-ish: prompt
+prefix_rule(pattern = ["git", "reset"], decision = "prompt")
+prefix_rule(pattern = ["git", "restore"], decision = "prompt")
+prefix_rule(pattern = ["git", "clean"], decision = "prompt")
+prefix_rule(pattern = ["git", ["rebase", "merge", "cherry-pick", "revert"]], decision = "prompt")
+
+
+# ------------------------------------------------------------------------------
+# gh
+# ------------------------------------------------------------------------------
+
+prefix_rule(
+    pattern = ["gh", "pr", ["view", "diff", "list"]],
+    decision = "allow"
+)
+
+prefix_rule(
+    pattern = ["gh", "run", ["list", "view"]],
+    decision = "allow"
+)
+
+prefix_rule(
+    pattern = ["gh", "issue", ["view", "list"]],
+    decision = "allow"
+)
+
+prefix_rule(
+    pattern = ["gh", "repo", "view"],
+    decision = "allow"
+)
+
+prefix_rule(
+    pattern = ["gh", "pr", ["view", "diff", "list"]],
+    decision = "allow"
+)
+
+prefix_rule(
+    pattern = ["gh", "run", ["list", "view"]],
+    decision = "allow"
+)
+
+prefix_rule(
+    pattern = ["gh", "issue", ["view", "list"]],
+    decision = "allow"
+)
+
+prefix_rule(
+    pattern = ["gh", "repo", "view"],
+    decision = "allow"
+)

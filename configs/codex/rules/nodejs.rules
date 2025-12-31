@@ -1,0 +1,20 @@
+# ------------------------------------------------------------------------------
+# Bun
+# ------------------------------------------------------------------------------
+
+# Basic tasks: allow
+prefix_rule(
+    pattern = ["bun", ["test", "run"]],
+    decision = "allow",
+    match = [
+        "bun test",
+        "bun run build",
+        "bun run lint:ci",
+        "bun run typecheck",
+    ],
+)
+
+# Dependency changes: prompt
+prefix_rule(pattern = ["bun", "add"], decision = "prompt")
+prefix_rule(pattern = ["bun", "remove"], decision = "prompt")
+prefix_rule(pattern = ["bun", "upgrade"], decision = "prompt")
