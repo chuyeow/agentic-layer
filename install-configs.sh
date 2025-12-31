@@ -6,6 +6,7 @@ usage() {
 Usage: bin/install-configs [--force] [--dry-run]
 
 Symlink repo `configs/codex/**` into `~/.codex/**` (or `$CODEX_HOME/**`).
+Also symlink repo `AGENTS.md` into `~/.claude/CLAUDE.md`.
 
 Options:
   --force    move conflicting targets aside (adds `.bak.<epoch>`)
@@ -93,6 +94,10 @@ done
 
 if [[ -f "$repo_root/AGENTS.md" ]]; then
   if ! link_file "$repo_root/AGENTS.md" "$dst_root/AGENTS.md"; then
+    errors=1
+  fi
+
+  if ! link_file "$repo_root/AGENTS.md" "$HOME/.claude/CLAUDE.md"; then
     errors=1
   fi
 else
