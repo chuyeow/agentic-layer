@@ -11,7 +11,7 @@ prefix_rule(
 )
 
 prefix_rule(
-    pattern = ["git", ["status", "diff", "log", "show", "blame"]],
+    pattern = ["git", ["status", "diff", "log", "show", "blame", "fetch"]],
     decision = "allow"
 )
 
