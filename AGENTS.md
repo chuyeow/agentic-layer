@@ -25,6 +25,7 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 - `git checkout` ok for PR review / explicit request.
 - Destructive ops only with explicit approval (`reset --hard`, `clean`, `restore`, `rm`, …).
 - Unexpected deletes/renames: stop and ask.
+- Commit messages: 72-char line limit. Explain decisions and non-obvious.
 
 ## PR Feedback
 - PR comments: `gh pr view <PR number> --comments` + `gh api repos/<owner>/<repo>/pulls/<PR number>/comments --paginate`.
