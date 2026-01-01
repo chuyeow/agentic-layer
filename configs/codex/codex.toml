@@ -1,0 +1,21 @@
+model = "gpt-5.2"
+model_reasoning_effort = "high"
+tool_output_token_limit = 25000
+
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+ network_access = true
+
+[features]
+apply_patch_freeform = true
+web_search_request = true
+tui2 = true
+skills = true
+
+[notice.model_migrations]
+"gpt-5.2" = "gpt-5.2-codex"
+
+[mcp_servers.chrome-devtools]
+command = "npx"
+args = ["chrome-devtools-mcp@latest"]
