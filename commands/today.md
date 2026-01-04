@@ -75,6 +75,7 @@ Primary and highest signal first:
 - `Notes/The append-and-review note.md`
 - `Notes/Daily/[YYYY-MM-DD.md]` - look for the todos from the previous working day to follow up on what was actually achieved, or should be rescheduled to today.
 - `Notes/Daily/` - look for the most recent daily plan with a lot of incomplete TODOs. This is not necessarily the most recent dated file, so keep looking backwards or use filemod times to identify the relevant file.
+- `docs-for-ai/journal` - learnings and observations from previous planning sessions.
 - Other recent `Notes/*.md`. They may contain relevant information that is not explicitly mentioned in the above sources.
 
 Exclude: `.obsidian/**`, archived folders, binary/huge files.
@@ -226,6 +227,17 @@ Use this format:
 - **Quarter**: [key objective]
 - **Month**: [milestone]
 - **Week**: [theme]
+
+### Phase 8: journal to learn and compound
+
+Write what you've learnt and observed in this planning session into a new note in `docs-for-ai/journal`.
+
+This will be useful in future planning sessions.
+
+Key things to note (not exclusive):
+- Preferences and style
+- How schedule conflicts and ties are broken
+- Useful context for future sessions
 
 ---
 
