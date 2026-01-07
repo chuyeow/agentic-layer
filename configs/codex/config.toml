@@ -5,7 +5,11 @@ tool_output_token_limit = 25000
 sandbox_mode = "workspace-write"
 
 [sandbox_workspace_write]
- network_access = true
+network_access = true
+writable_roots = [
+  "/Users/chuyeow/code/personal-agent-stack/.git",
+  "/Users/chuyeow/code/personal-agent-stack/.git/worktrees",
+]
 
 [features]
 apply_patch_freeform = true
