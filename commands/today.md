@@ -1,6 +1,6 @@
 ---
 name: today
-allowed-tools: Read, Write, Bash(mkdir:*), TodoWrite, mcp__google-calendar__google_calendar_*
+allowed-tools: AskUserQuestion, Read, Write, Bash(mkdir:*), TodoWrite, mcp__google-calendar__google_calendar_*
 description: Chief of Staff - daily planning using Obsidian todos
 argument-hint: [optional date override, e.g. 2025-12-08]
 ---
@@ -95,7 +95,7 @@ After scoring, present the top 5 candidates and ask the user to pick the ONE Thi
 
 ## Conversation Flow
 
-Guide the conversation through these phases **one at a time**. Ask 2-3 questions per phase, wait for responses, then proceed. Do not overwhelm with all questions at once.
+Guide the conversation through these phases **one at a time**. Use the AskUserQuestion tool to ask 2-3 questions per phase, wait for responses, then proceed. Do not overwhelm with all questions at once.
 
 ### Phase 1: Opening Context (with Calendar Awareness)
 
@@ -109,7 +109,7 @@ Start by summarizing the state of play INCLUDING a subtle calendar summary:
 **Example opening**:
 "Good morning! I see 3 incomplete tasks from yesterday and 2 new #urgent items. Calendar shows 3 meetings today (4.5 hours available for focus work). Let's build a realistic plan."
 
-**Then ask clarifying questions** (enhanced with calendar awareness):
+**Then ask clarifying questions using the AskUserQuestion tool**
 - "Any fires burning or time-sensitive items I should know about first?"
 - "How's your energy today - high focus available, or a lighter day?"
 - [IF calendar_available AND has meetings]: "I see [meeting titles] on your calendar - any other hard commitments I should know about?"
@@ -140,7 +140,7 @@ Surface items that may have accumulated:
 - "Anything from recent meetings or conversations that needs capturing?"
 - "Any delegated items you need to follow up on?"
 
-**Calendar-Informed Questions** (only if relevant meetings detected):
+**Calendar-Informed Questions using the AskUserQuestion tool** (only if relevant meetings detected):
 - If big_meeting_today (>60 min): "You have [meeting title] at [time] - any prep or materials needed?"
 - If recurring_1_on_1 detected: "I see you have [1:1 name] today - anything to discuss or prepare?"
 - If external_meeting detected (keywords: "interview", "demo", "investor", "board"): "For [meeting] - do you need to prepare slides, talking points, or review materials?"
