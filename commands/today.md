@@ -1,6 +1,6 @@
 ---
 name: today
-allowed-tools: AskUserQuestion, Read, Write, Bash(mkdir:*), TodoWrite, mcp__google-calendar__google_calendar_*
+allowed-tools: AskUserQuestion, Read, Write, Bash(mkdir:*), Bash(python3 .agents/skills/querying-granola/scripts/granola.py:*), TodoWrite, mcp__google-calendar__google_calendar_*
 description: Chief of Staff - daily planning using Obsidian todos
 argument-hint: [optional date override, e.g. 2025-12-08]
 ---
@@ -69,6 +69,49 @@ Store as `week_ahead_events` for:
 - Continue with conversation flow normally (graceful degradation)
 - If auth error on first attempt: Offer one-time setup hint in Phase 1
 
+### 0.6 Granola Meeting Notes Scan (Mandatory)
+
+Goal:
+- 1) Extract candidate follow-ups (action items) from recent meetings.
+- 2) Suggest week/month/quarter planning adjustments from recurring themes + commitments.
+
+Privacy:
+- Do not write raw Granola notes anywhere.
+- Only surface extracted action items + aggregated nudges.
+
+Commands (querying-granola skill):
+- `python3 .agents/skills/querying-granola/scripts/granola.py recent 50`
+- `python3 .agents/skills/querying-granola/scripts/granola.py context "<exact meeting title>"`
+- `python3 .agents/skills/querying-granola/scripts/granola.py active 30`
+- `python3 .agents/skills/querying-granola/scripts/granola.py timeline "<query>"`
+
+Windows:
+- Follow-ups: last 7 days
+- Weekly nudges: last 30 days
+- Monthly/quarterly nudges: last 90 days
+
+Action item extraction (light heuristics):
+- Prefer explicit headings: “Action items”, “Next steps”, “Follow-ups”, “To-dos”
+- Also capture commitments: “I’ll …”, “We’ll …”, “Need to …”, “Follow up …”, “Send …”, “Schedule …”
+- Attach metadata:
+  - owner (me / other / unknown)
+  - due hint (explicit date, relative time, “before <event>”)
+  - source (meeting title + date)
+  - confidence (high=explicit, medium=implicit, low=speculative)
+- Dedup: same verb+object → keep newest; merge sources
+
+Planning nudges (convert signals → proposals):
+- Build theme histogram from meeting titles + summaries (ignore stopwords)
+- Convert to candidate adjustments:
+  - weekly: protected blocks for top themes + batch follow-ups
+  - monthly: governance cadence (hiring pipeline, budget, architecture review, stakeholder updates)
+  - quarterly: objective/time allocation drift (meeting mix ≠ stated OKRs)
+- Keep to 2-4 suggestions max; ask user to confirm.
+
+Error handling:
+- If script errors/empty: set `granola_available = false`; continue silently.
+- If success: set `granola_available = true`.
+
 ## Obsidian Sources (scan in this order)
 
 Primary and highest signal first:
@@ -87,6 +130,7 @@ Assign a simple additive score to each open task:
 - +1 if tagged `#today`
 - +1 if due today or overdue
   (examples to match: `due:YYYY-MM-DD`, `YYYY-MM-DD`, or phrases like “today”)
+- +2 if tagged `#followup` and clearly tied to a recent meeting commitment (e.g., captured from Granola)
 - +1 if sourced from `Notes/The append-and-review note.md` (this is a high signal that the user is trying to get something done)
 - +1 if the containing file was modified within the last 72 hours
 - −1 if the line is a vague reading/link with no clear action (e.g., only a URL)
@@ -105,6 +149,9 @@ Start by summarizing the state of play INCLUDING a subtle calendar summary:
 - If 0-1 meetings: "Calendar looks clear - [X] hours available for deep work."
 - If 2-4 meetings: "Calendar has [N] meetings today ([X] hours available for focus work)."
 - If 5+ meetings: "Calendar is packed - [N] meetings back-to-back ([X] hours available in gaps)."
+
+**Granola Summary** (only if granola_available):
+- "I pulled [N] candidate meeting follow-ups from recent Granola notes."
 
 **Example opening**:
 "Good morning! I see 3 incomplete tasks from yesterday and 2 new #urgent items. Calendar shows 3 meetings today (4.5 hours available for focus work). Let's build a realistic plan."
@@ -125,6 +172,10 @@ Start by summarizing the state of play INCLUDING a subtle calendar summary:
 - "What are your 1-2 key objectives this quarter?"
 - "Any monthly milestones coming up?"
 - "What's the theme for this week?"
+
+**If granola_available**:
+- Share 2-4 “candidate planning nudges” max (weekly/monthly/quarterly).
+- Ask: “Which (if any) should we incorporate into today/this week’s plan?”
 
 **Week-ahead calendar insights** (if week_ahead_events available):
 - If a day this week is unusually light: "I notice [day] looks clear - good day to schedule deep work or defer today's overflow."
@@ -148,6 +199,14 @@ Surface items that may have accumulated:
 **Presentation Style**:
 - Bundle meeting questions: "A few calendar-related items - [question 1], and [question 2]?"
 - Offer opt-out: "Or we can skip the meeting prep discussion if you're covered."
+
+**If granola_available**:
+- Present top 5 candidate follow-ups (me-owned first; high confidence first).
+- Ask: “Which should become todos today vs schedule later vs drop?”
+- After user confirms:
+  - Convert into Obsidian tasks (same capture format as other todos)
+  - Tag: `#followup` (+ `#today`/`#urgent` only with user agreement)
+  - If due hint exists: add `due:YYYY-MM-DD` when possible
 
 ### Phase 4: High Leverage Work (The ONE Thing - Calendar-Validated)
 
@@ -227,6 +286,15 @@ Use this format:
 - **Quarter**: [key objective]
 - **Month**: [milestone]
 - **Week**: [theme]
+
+## Meeting Follow-ups (Granola)
+- [ ] [Action item] — *source: [meeting title] ([date])*
+- [ ] [Action item]
+
+## Planning Nudges (Granola)
+- **Weekly**: [candidate adjustment]
+- **Monthly**: [candidate adjustment]
+- **Quarterly**: [candidate adjustment]
 
 ### Phase 8: journal to learn and compound
 
