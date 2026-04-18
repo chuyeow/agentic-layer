@@ -2,7 +2,6 @@
 name: git-commit
 allowed-tools: Bash(git:*)
 description: Commit changes
-model: haiku
 ---
 
 # Rules
