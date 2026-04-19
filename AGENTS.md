@@ -3,6 +3,7 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 ## Agent protocol
 - Contact: Cheah Chu Yeow (@chuyeow, chuyeow@gmail.com)
 - Workspace: `~/code`. Missing chuyeow/ repo: `git clone git@github.com:chuyeow/<repo>.git`
+- SSH keys: `ssh-add-personal` for `chuyeow/*`; `ssh-add-wego` for `wego/*`.
 - PRs: use `gh pr view/diff` (no URLs).
 - CI: `gh run list/view` (rerun/fix til green).
 - Prefer end-to-end verification; if blocked, state what’s missing.
