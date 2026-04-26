@@ -19,13 +19,14 @@ If unsure, try public path first. Only switch to auth path if the page shows a l
 
 ## Tool Priority Order
 
-You have three browser tool families:
+You have four browser tool families:
 
-1. **agent-browser CLI** (primary) — headless Chrome via CDP. Always available. Handles public path and auth path (via `--auto-connect`).
-2. **claude-in-chrome MCP** — browser extension in the user's live Chrome. Only relevant for auth path.
-3. **chrome-devtools MCP** — DevTools protocol against user's Chrome. Only relevant for auth path.
+1. **agent-browser CLI** (primary, public pages) — headless Chrome via CDP. Always available. Use for public pages without login.
+2. **browser-harness** (primary, auth pages) — attaches to user's running Chrome via CDP. No debug port flag needed. Use for any task that needs the user's logged-in session, or binary file downloads.
+3. **claude-in-chrome MCP** — browser extension in the user's live Chrome. Fallback for auth path.
+4. **chrome-devtools MCP** — DevTools protocol against user's Chrome. Fallback for auth path.
 
-**Default to agent-browser CLI.** Only use MCP tools if the user asks, or after agent-browser auth path fails and the user tells you to switch.
+**Public page → agent-browser. Auth page → browser-harness.** Only use MCP tools if browser-harness fails and the user tells you to switch.
 
 ## Default Path (Public Pages)
 
@@ -60,44 +61,119 @@ Use the snapshot refs (`@e1`, `@e2`, etc.) to interact. Re-snapshot after any na
 
 Only use this path when the task explicitly needs the user's login. Public pages do not belong here.
 
-### Option A: Connect to user's running Chrome (preferred)
+### Option A: browser-harness (preferred)
+
+browser-harness attaches to the user's running Chrome via a local Unix socket daemon. No debug port flag, no Chrome restart. Requires Chrome to be running.
+
+**Setup (once per machine):**
+```bash
+git clone https://github.com/browser-use/browser-harness ~/code/browser-harness
+cd ~/code/browser-harness
+uv tool install -e .
+command -v browser-harness   # should print a path
+```
+
+Then verify it can attach:
+```bash
+browser-harness -c "print(page_info())"
+```
+
+If Chrome shows an `Allow` dialog on `chrome://inspect`, click Allow. That setting is sticky — you only do it once per Chrome profile.
+
+If the daemon session goes stale (`no close frame` / `Inspected target navigated or closed`):
+```bash
+cd ~/code/browser-harness && uv run python - <<'PY'
+from admin import restart_daemon
+restart_daemon()
+PY
+```
+
+**Basic usage:**
+```bash
+# Navigate in a new tab (never goto_url first — it clobbers user's active tab)
+browser-harness -c "
+new_tab('https://app.example.com')
+wait_for_load()
+print(page_info())
+capture_screenshot('/tmp/shot.png')
+"
+```
+
+**Read the page / find elements:**
+```bash
+browser-harness -c "
+links = js(\"Array.from(document.querySelectorAll('a')).map(el => ({href: el.href, text: el.textContent.trim().slice(0,60)}))\")
+print(links)
+"
+```
+
+**Click by coordinate** (screenshot first, then click):
+```bash
+browser-harness -c "
+capture_screenshot('/tmp/shot.png')   # read image to find target coords
+click_at_xy(x, y)
+import time; time.sleep(1)
+capture_screenshot('/tmp/after.png')  # verify
+"
+```
+
+**Binary file downloads** — `http_get()` in helpers.py decodes as UTF-8 and fails on binary. Use urllib directly with CDP session cookies:
+```bash
+browser-harness -c "
+import urllib.request, gzip
+
+cookies = cdp('Network.getCookies', urls=['https://files.example.com'])
+cookie_str = '; '.join(f\"{c['name']}={c['value']}\" for c in cookies.get('cookies', []))
+
+req = urllib.request.Request(url, headers={
+    'Cookie': cookie_str,
+    'Referer': 'https://app.example.com/',
+    'User-Agent': 'Mozilla/5.0',
+})
+with urllib.request.urlopen(req, timeout=60) as r:
+    raw = r.read()
+    if r.headers.get('Content-Encoding') == 'gzip':
+        raw = gzip.decompress(raw)
+open('/tmp/file.zip', 'wb').write(raw)
+print('saved bytes:', len(raw))
+"
+```
+
+If `browser-harness` is not installed: **STOP. Tell the user.** Show the setup steps above and wait.
+
+### Option B: agent-browser --auto-connect (fallback)
 
 ```bash
 agent-browser --auto-connect snapshot -i
 ```
 
-This connects to the user's already-running Chrome with their login sessions intact.
+Requires Chrome to expose a debug port. If you see `✗ No running Chrome instance with remote debugging found`, do not silently give up. Report the error, then present these options and wait:
 
-**If you see `✗ No running Chrome instance with remote debugging found` (or similar):** the user's Chrome is not exposing a debug port. Do not silently give up. Report the exact error, then present these options to the user and wait:
-
-1. **Start Chrome with remote debugging, then retry:**
+1. **Restart Chrome with debug port:**
    ```bash
    # macOS — quit Chrome first, then:
    open -a "Google Chrome" --args --remote-debugging-port=9222
    ```
-   After Chrome is up and logged in to the target site, say "retry" and rerun `agent-browser --auto-connect ...`.
+   After Chrome is up and logged in, say "retry".
 
-2. **Use claude-in-chrome MCP instead** (Option B below) — works with the extension without needing a debug port.
+2. Switch to claude-in-chrome MCP (Option C).
+3. Switch to chrome-devtools MCP (Option D).
 
-3. **Use chrome-devtools MCP instead** (Option C below).
+Do **not** pick one yourself. Wait for the user.
 
-4. **Use saved auth state** (Option D below) if one exists.
-
-Do **not** pick one of these yourself. Tell the user the options and wait for them to choose.
-
-### Option B: Use claude-in-chrome MCP (if extension is active)
+### Option C: Use claude-in-chrome MCP (if extension is active)
 
 1. Call `mcp__claude-in-chrome__tabs_context_mcp` to check available tabs
 2. Use `mcp__claude-in-chrome__navigate`, `mcp__claude-in-chrome__read_page`, etc.
 
-If the MCP tool returns an error or timeout: **STOP. Tell the user.** Do not assume the extension isn't installed. Report the exact error.
+If the MCP tool returns an error or timeout: **STOP. Tell the user.** Report the exact error.
 
-### Option C: Use chrome-devtools MCP
+### Option D: Use chrome-devtools MCP
 
 1. Call `mcp__chrome-devtools__list_pages` to check connection
 2. Use `mcp__chrome-devtools__navigate_page`, `mcp__chrome-devtools__take_screenshot`, etc.
 
-### Option D: Session persistence (for repeated access)
+### Option E: Session persistence (for repeated access)
 
 ```bash
 # First time: connect to user's browser, save auth state
