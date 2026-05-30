@@ -48,7 +48,7 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 
 ### oracle (second model)
 
-Send prompt+files to oracle when stuck/buggy/for review.
+Send prompt+files to [oracle](https://github.com/steipete/oracle) when stuck/buggy/for review.
 Before first oracle use each session: `npx -y @steipete/oracle --help`.
 
 ### gh
