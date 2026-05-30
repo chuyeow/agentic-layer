@@ -1,6 +1,7 @@
 Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; min tokens.
 
 ## Agent protocol
+
 - Contact: Cheah Chu Yeow (@chuyeow, chuyeow@gmail.com)
 - Workspace: `~/code`. Missing chuyeow/ repo: `git clone git@github.com:chuyeow/<repo>.git`
 - SSH keys: `ssh-add-personal` for `chuyeow/*`; `ssh-add-wego` for `wego/*`.
@@ -11,15 +12,18 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 - Oracle: run `npx -y @steipete/oracle --help` once/session before first use.
 
 ## Important Locations
+
 - Obsidian vault: `~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Vaults`
 
 ## Build + test
+
 - Handoff gate: run lint/typecheck/tests/docs.
 - TDD: test first; red/green/refactor; use the `tdd` skill.
 - CI red: `gh run list/view`, rerun, fix, push, repeat til green.
 - Keep it observable: logs, panes, tails, MCP/browser tools.
 
 ## Git
+
 - Safe by default: `git status/diff/log/add/commit`.
 - OK: `git add`, `git commit`.
 - OK: `git push` when non-destructive.
@@ -29,9 +33,11 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 - Commit messages: 72-char line limit. Explain decisions and non-obvious.
 
 ## PR Feedback
+
 - PR comments: `gh pr view <PR number> --comments` + `gh api repos/<owner>/<repo>/pulls/<PR number>/comments --paginate`.
 
 ## Critical Thinking
+
 - Fix root cause; no band-aids.
 - If unsure: read more code; still stuck => ask with short options.
 - Conflicts: call out; choose safer path.
@@ -41,24 +47,32 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 ## Tools
 
 ### oracle (second model)
+
 Send prompt+files to oracle when stuck/buggy/for review.
 Before first oracle use each session: `npx -y @steipete/oracle --help`.
 
 ### gh
+
 - Use `gh` for PRs/CI/releases; even if given a URL (or `/pull/5`), don’t web-search.
 - Examples: `gh issue view <url> --comments -R owner/repo`, `gh pr view <url> --comments --files -R owner/repo`.
 
 ### tmux
+
 - tmux only when you need persistence/interaction (server/debugger).
 - Quick refs: `tmux new -d -s agent-shell`, `tmux attach -t agent-shell`, `tmux list-sessions`, `tmux kill-session -t agent-shell`.
+
+### Email
+
+- Your inbox is in AgentMail, API key in `~/.config/agentmail/credentials`, docs in https://docs.agentmail.to/quickstart
 
 <frontend_aesthetics>
 Avoid "AI slop" UI. Be opinionated + distinctive.
 
 Do:
+
 - Type: skip Inter/Roboto/Arial/system fonts; pick a voice.
 - Theme: commit to a palette; bold accents > timid gradients.
-</frontend_aesthetics>
+  </frontend_aesthetics>
 
 ## Principle: Functional Core, Imperative Shell
 
