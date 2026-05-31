@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ship Vercel App"
+  short_description: "Deploy local apps via GitHub and Vercel"
+  default_prompt: "Use $ship-vercel-app to deploy this local app to GitHub and Vercel production."
