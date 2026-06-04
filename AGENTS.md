@@ -15,6 +15,11 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 
 - Obsidian vault: `~/Library/Mobile\ Documents/iCloud~md~obsidian/Documents/Vaults`
 
+## Writing style
+
+- Prose: en-dashes (–) not em-dashes (—); my signature. Jira: em-dash → colon.
+- Copy: plain not flowery; concise not repetitive. Slides: terse — verbalized live, not read literally.
+
 ## Build + test
 
 - Handoff gate: run lint/typecheck/tests/docs.
@@ -39,6 +44,9 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 ## Critical Thinking
 
 - Fix root cause; no band-aids.
+- Propose plan + target path/filename before acting; explain basis before generating. Review-only request => no edits.
+- No invented filenames, dates, attributions, names, or reasons. Verify each claim against source/code before stating. Real entities only — never pull from draft/aspirational docs.
+- After correcting skill/template output, fix the skill/template too so the mistake doesn't recur.
 - If unsure: read more code; still stuck => ask with short options.
 - Conflicts: call out; choose safer path.
 - Unrecognized changes: assume another agent; keep scope tight; if issues, stop + ask.
