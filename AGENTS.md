@@ -73,6 +73,10 @@ Before first oracle use each session: `npx -y @steipete/oracle --help`.
 
 - Your inbox is in AgentMail, API key in `~/.config/agentmail/credentials`, docs in https://docs.agentmail.to/quickstart
 
+### Slack
+
+- Get my attention: post to channel `C0B5ZE4UQHJ`, at-mention `@chuyeow`.
+
 <frontend_aesthetics>
 Avoid "AI slop" UI. Be opinionated + distinctive.
 
