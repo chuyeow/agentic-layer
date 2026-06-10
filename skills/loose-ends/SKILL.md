@@ -43,8 +43,17 @@ Read-only inspection and reversible, no-data-loss actions:
 - **Fast-forward main:** if local `main` is behind origin and clean, `git pull --ff-only`
   (can't conflict, can't lose work).
 - **CI / running jobs:** `gh run list` / `gh pr checks` — is anything still in flight?
-- **Dev processes this session started:** background tmux sessions, dev servers
-  (`tmux list-sessions`, the relevant `pkill -f`) — kill the ones you launched.
+- **Dev processes this session started:** kill the ones you launched. Check ALL of:
+  - **Harness background tasks** — anything started with `Bash run_in_background` or
+    `Monitor` (CI/PR poll loops, log tails, `until`/`while` watchers). These are NOT
+    tmux. List them (`TaskList`) and `TaskStop` any still running — a poll loop whose
+    break condition never matched (e.g. `gh run view <id>` without `-R`, returning empty)
+    will spin forever. As a backstop, `pgrep -fl 'while :|sleep [0-9]|gh run view'` and
+    kill stray watch loops this session spawned.
+  - **tmux sessions & dev servers** you started (`tmux list-sessions`, the relevant
+    `pkill -f`).
+  Don't just check tmux — detached background tasks are the usual leftover, and they're
+  invisible to `tmux list-sessions`.
 
 ### Tier 2 — ASK FIRST (surface it, propose the action, wait)
 
