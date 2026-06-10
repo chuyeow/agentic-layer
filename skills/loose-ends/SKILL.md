@@ -77,10 +77,13 @@ Anything that mutates shared state or could lose work:
 
 ## Autonomous mode
 
-When there's no human in the loop (agent-driven workflows that decide their own
-wrap-up — typically signalled by env `LOOSE_ENDS_AUTO` and enforced by the `Stop`
-hook `loose-ends-gate.sh`), the Tier 2 "ask first" rule can't apply — there's no one
-to ask. Resolve it as **safe-default-or-defer**:
+A `Stop` hook (`loose-ends-gate.sh`) enforces this skill: on a wrap-up signal in the
+last user/assistant message it blocks the stop once per session and tells the agent to
+run this sweep — so it fires whether a human typed "wrap up" or an autonomous agent
+concluded on its own. No env var; mid-work (no signal) stays silent.
+
+When there's no human in the loop, the Tier 2 "ask first" rule can't apply — there's no
+one to ask. Resolve it as **safe-default-or-defer**:
 
 - Do every Tier 1 AUTO action as normal.
 - For Tier 2 items, take the **reversible, non-destructive** option yourself: commit
