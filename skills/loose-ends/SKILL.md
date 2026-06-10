@@ -42,8 +42,6 @@ Read-only inspection and reversible, no-data-loss actions:
   branch usually auto-deletes on merge — verify, don't assume.
 - **Fast-forward main:** if local `main` is behind origin and clean, `git pull --ff-only`
   (can't conflict, can't lose work).
-- **ssh-agent:** `ssh-add -l` — is the right key loaded for the repos in play? (See
-  project notes below.) Re-point if wrong.
 - **CI / running jobs:** `gh run list` / `gh pr checks` — is anything still in flight?
 - **Dev processes this session started:** background tmux sessions, dev servers
   (`tmux list-sessions`, the relevant `pkill -f`) — kill the ones you launched.
@@ -58,7 +56,7 @@ Anything that mutates shared state or could lose work:
 - **Unmerged / stale branches** → list; ask before `git branch -D` (force-delete loses commits).
 - **Scratch/throwaway files that got committed** → e.g. a one-off diagnostic HTML swept
   into a commit. Flag it: "this was a throwaway — remove from the repo?" Don't silently delete.
-- **Leftover `.venv` / build output / temp dirs** → mention; remove only if asked.
+- **Leftover build output / temp dirs** → mention; remove only if asked.
 - **Full test suite / expensive verify** → offer; don't run unprompted (slow).
 - **Processes you did NOT start, or env-var changes** → ask before touching.
 
@@ -77,15 +75,8 @@ Anything that mutates shared state or could lose work:
 - **Persist knowledge:** non-obvious facts learned this session (operational workflows,
   gotchas, constraints not derivable from code) → write to memory before context is lost.
 
-## Project-specific
-
-- **Wego repos** (`wego/*`): pushes need the wego ssh key — `ssh-add-wego`. Verify CI is
-  green on any PR before calling it done. Worktrees often live under `.claude/worktrees/`.
-- **Personal repos** (`chuyeow/*`): need `ssh-add-personal`. (Switching keys with
-  `ssh-add -D` affects the other set — check `ssh-add -l` matches the repo you're pushing.)
-
 ## Output shape
 
 Lead with a one-line verdict ("Clean and synced — nothing blocking" or "3 things to
-decide"). Then: what you auto-handled (terse), what needs a decision (Tier 2, with a
+decide"). Then in bullet points: what you auto-handled (terse), what needs a decision (Tier 2, with a
 proposed action each), and info-only notes last. Keep it scannable — the user is leaving.
