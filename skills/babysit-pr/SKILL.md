@@ -18,7 +18,8 @@ being re-asked once a PR exists.
 
 Out of scope (these happen BEFORE the PR, not here): `/simplify` on the diff,
 writing the PR body to the gold standard (`write-pr-description`), and
-`gh pr create` itself. This skill starts at "the PR is open."
+`gh pr create` itself — the `ship` skill covers that pipeline. This skill
+starts at "the PR is open."
 
 ## Operating rules
 
@@ -142,6 +143,7 @@ writing the PR body to the gold standard (`write-pr-description`), and
 
 ## Notes
 
-- Starts at "the PR is open." If invoked before a PR exists, stop and point at
-  the pre-PR steps (`/simplify`, `write-pr-description`, `gh pr create`) — do
-  not create the PR from inside this skill.
+- Starts at "the PR is open." If invoked before a PR exists, stop and run the
+  `ship` skill instead — it carries the branch through the quality gates,
+  opens the PR (`write-pr-description` governs the body), and hands back here.
+  Do not create the PR from inside this skill.
