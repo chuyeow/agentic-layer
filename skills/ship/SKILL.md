@@ -80,7 +80,10 @@ description: >-
 6. **Open the PR.** Body per the `write-pr-description` skill, with
    `## Verification` built from the gate evidence. `gh pr create` — or,
    if a PR was already open for the branch, `gh pr edit <PR> --body` to
-   refresh it (the gates still ran; their fixes already pushed).
+   refresh it (the gates still ran; their fixes already pushed). If
+   shipping involved work the diff does not show — dispatched workflow
+   runs, backfills/migrations, DB writes, changes in external systems —
+   surface it on the PR via the `pr-work-log` skill.
 
 7. **Run the `babysit-pr` skill to the end** — rebases, CI to green,
    review threads, Slack, the merge question. Ship is done when babysit
