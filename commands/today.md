@@ -1,6 +1,6 @@
 ---
 name: today
-allowed-tools: AskUserQuestion, Read, Write, Bash(mkdir:*), Bash(python3 .agents/skills/querying-granola/scripts/granola.py:*), TodoWrite, mcp__google-calendar__google_calendar_*
+allowed-tools: AskUserQuestion, Read, Write, Bash(mkdir:*), TodoWrite, mcp__google-calendar__google_calendar_*, mcp__claude_ai_Granola__*
 description: Chief of Staff - daily planning using Obsidian todos
 argument-hint: [optional date override, e.g. 2025-12-08]
 ---
@@ -79,11 +79,11 @@ Privacy:
 - Do not write raw Granola notes anywhere.
 - Only surface extracted action items + aggregated nudges.
 
-Commands (querying-granola skill):
-- `python3 .agents/skills/querying-granola/scripts/granola.py recent 50`
-- `python3 .agents/skills/querying-granola/scripts/granola.py context "<exact meeting title>"`
-- `python3 .agents/skills/querying-granola/scripts/granola.py active 30`
-- `python3 .agents/skills/querying-granola/scripts/granola.py timeline "<query>"`
+Tools (claude.ai Granola connector):
+- `mcp__claude_ai_Granola__list_meetings` — recent meetings (pass a limit, e.g. 50)
+- `mcp__claude_ai_Granola__get_meeting_transcript` — full notes/transcript for one meeting
+- `mcp__claude_ai_Granola__query_granola_meetings` — search across meetings by topic/query
+- `mcp__claude_ai_Granola__get_meetings` — fetch meeting details by id
 
 Windows:
 - Follow-ups: last 7 days
@@ -109,7 +109,7 @@ Planning nudges (convert signals → proposals):
 - Keep to 2-4 suggestions max; ask user to confirm.
 
 Error handling:
-- If script errors/empty: set `granola_available = false`; continue silently.
+- If the Granola connector errors/empty/unavailable: set `granola_available = false`; continue silently.
 - If success: set `granola_available = true`.
 
 ## Obsidian Sources (scan in this order)
