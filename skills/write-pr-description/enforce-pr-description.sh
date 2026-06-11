@@ -19,15 +19,17 @@ else
 fi
 [ -z "$cmd" ] && cmd="$input"
 
-# Only police PR-body-bearing commands.
-case "$cmd" in
-  *"gh pr create"*) ;;
-  *"gh pr edit"*)
-    # edit only matters when it sets a body
-    case "$cmd" in *"--body"*) ;; *) exit 0 ;; esac
-    ;;
-  *) exit 0 ;;
-esac
+# Only police PR-body-bearing commands. Anchor the match to a command
+# position — start of string or right after ; & | ( — so text that merely
+# mentions the command (a commit message, a heredoc) doesn't trip the gate.
+if [[ "$cmd" =~ (^|[\;\&\|\(][[:space:]]*)gh[[:space:]]+pr[[:space:]]+create ]]; then
+  :
+elif [[ "$cmd" =~ (^|[\;\&\|\(][[:space:]]*)gh[[:space:]]+pr[[:space:]]+edit ]]; then
+  # edit only matters when it sets a body
+  case "$cmd" in *"--body"*) ;; *) exit 0 ;; esac
+else
+  exit 0
+fi
 
 # Fail open when the body isn't inline / isn't ours to judge.
 case "$cmd" in
