@@ -84,6 +84,11 @@ starts at "the PR is open."
      emitting each check as it settles and stopping when all are non-pending.
      Cover failure states, not just the happy path. Note expected skips
      (`process-submission`, Vercel Agent Review).
+   - **A bot-review check (CodeRabbit, etc.) reporting `pass`/green is a *check
+     status*, NOT thread resolution** — these bots post unresolved review
+     threads while their own check stays green. Never read "CodeRabbit: pass"
+     as "comments addressed." Fetch the actual threads (step 5) — that sweep is
+     mandatory regardless of how the bot's check reports.
    - On **failure**: read `references/fixing-failures.md` and follow it —
      diagnose from commit-scoped logs (`gh run view --log-failed`), fix by
      failure class, stage without debris, commit with a specific message,
