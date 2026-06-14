@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eat Like Japanese Local Foodie"
+  short_description: "Research Japan restaurants like local foodies."
+  default_prompt: "Research where to eat in Japan using Japanese local-foodie methods."
