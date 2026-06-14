@@ -1,8 +1,11 @@
-model = "gpt-5.2"
-model_reasoning_effort = "high"
+model = "gpt-5.5"
+model_reasoning_effort = "xhigh"
 tool_output_token_limit = 25000
 
 sandbox_mode = "workspace-write"
+approval_policy = "on-request"
+
+approvals_reviewer = "guardian_subagent"
 
 [sandbox_workspace_write]
 network_access = true
@@ -16,6 +19,7 @@ apply_patch_freeform = true
 web_search_request = true
 tui2 = true
 skills = true
+codex_git_commit = true
 
 [notice.model_migrations]
 "gpt-5.2" = "gpt-5.2-codex"
@@ -23,3 +27,18 @@ skills = true
 [mcp_servers.chrome-devtools]
 command = "npx"
 args = ["chrome-devtools-mcp@latest"]
+
+[mcp_servers.chrome-devtools.tools.performance_start_trace]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.take_screenshot]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.click]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.press_key]
+approval_mode = "approve"
+
+[mcp_servers.chrome-devtools.tools.close_page]
+approval_mode = "approve"
