@@ -1,0 +1,16 @@
+{
+  "slug": "anthropic",
+  "name": "Anthropic",
+  "title": "Anthropic Reader",
+  "subtitle": "Company posts plus the team's tweets, in one place.",
+  "out_dir": "~/code/anthropic-site",
+  "x": {
+    "handles": ["AnthropicAI"],
+    "tabs": ["profile", "highlights"],
+    "search_slices": [],
+    "backfill_min_len": 250
+  },
+  "writing": [
+    { "type": "rss", "url": "https://www.anthropic.com/rss.xml", "label": "anthropic.com" }
+  ]
+}

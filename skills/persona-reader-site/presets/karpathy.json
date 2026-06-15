@@ -1,0 +1,18 @@
+{
+  "slug": "karpathy",
+  "name": "Andrej Karpathy",
+  "title": "Karpathy Reader",
+  "subtitle": "Tweets weighted by what the crowd loved, plus everything he wrote long-form.",
+  "out_dir": "~/code/karpathy-site",
+  "x": {
+    "handles": ["karpathy"],
+    "tabs": ["profile", "highlights"],
+    "search_slices": [],
+    "backfill_min_len": 250
+  },
+  "writing": [
+    { "type": "github_pages", "url": "https://karpathy.github.io/", "label": "karpathy.github.io" },
+    { "type": "bearblog", "url": "https://karpathy.bearblog.dev/blog/", "label": "karpathy.bearblog.dev" },
+    { "type": "medium", "handle": "karpathy" }
+  ]
+}
