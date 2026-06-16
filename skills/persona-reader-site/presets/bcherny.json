@@ -1,0 +1,16 @@
+{
+  "slug": "bcherny",
+  "name": "Boris Cherny",
+  "title": "Cherny Reader",
+  "subtitle": "Claude Code's creator — tweets ranked by the crowd, plus his long-form posts.",
+  "out_dir": "~/code/bcherny-site",
+  "x": {
+    "handles": ["bcherny"],
+    "tabs": ["profile", "highlights"],
+    "search_slices": [],
+    "backfill_min_len": 250
+  },
+  "writing": [
+    { "type": "rss", "url": "https://bcherny.github.io/feed.xml", "label": "bcherny.github.io" }
+  ]
+}
