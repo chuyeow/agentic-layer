@@ -1,6 +1,6 @@
 ---
 name: live-review
-description: Review an HTML file from Claude with inline comments. Spins up a Claude Code custom channel that serves the HTML with a commenting widget; the reviewer's comments are pushed into a dedicated reviewer Claude session that edits the file and replies in-page. Use when the user produces or has an HTML report/draft/output and wants to comment on it, mark it up, or iterate on it visually — triggers on "review this HTML", "let me comment on", "open for review", "live review", or finishing a draft HTML file.
+description: Review an HTML file from Claude with inline comments. Spins up a Claude Code custom channel that serves the HTML with a commenting widget; the reviewer's comments are pushed into a dedicated reviewer Claude session that edits the file and replies in-page. Use when the user produces or has an HTML report/draft/output and wants to comment on it, mark it up, or iterate on it visually — triggers on "review this HTML", "let me comment on", "open for review", "live review", or finishing a draft HTML file. Also triggers whenever the user asks to "create an HTML" (or build/generate/make an HTML file/page/report): after producing it, proactively SUGGEST opening it in live-review — offer the command, don't auto-launch.
 allowed-tools: Bash
 ---
 
@@ -36,6 +36,20 @@ Re-running on the same file reuses its session/port and just reopens the browser
 Invoke this skill when the user produces an HTML report/dashboard/draft and wants to
 review, annotate, or iterate on it — or asks to "open it for review" / "let me comment".
 Pass the absolute path of the HTML file as the only argument.
+
+## Suggest after creating HTML (don't auto-launch)
+
+When the user asks to **create / build / generate / make an HTML** file, page, or report,
+do the creation as normal — then **offer** live-review; do not start it unprompted. After
+writing the file, add a one-liner like:
+
+> Want to comment on this live? `bash ~/.claude/skills/live-review/start.sh <abs-path>` —
+> opens it in the browser with inline commenting; I'll edit + reply to your notes.
+
+Only run `start.sh` if the user says yes. Rationale: spinning up a tmux + `claude`
+reviewer session is heavyweight and shouldn't fire on every HTML you produce — the user
+decides when a draft is worth reviewing. (For true auto-launch on file write, see the
+opt-in PostToolUse hook below.)
 
 ## Important: what is and isn't automatable
 
