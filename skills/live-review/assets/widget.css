@@ -1,0 +1,76 @@
+/* live-review comment widget — injected into the page under review.
+   Everything is namespaced `lr-` / scoped to #lr-root so it can't clash with the host page. */
+#lr-root, #lr-root * { box-sizing: border-box; }
+#lr-root {
+  --lr-ink:#16180f; --lr-paper:#fffdf6; --lr-line:#d8cda8; --lr-accent:#c8541f; --lr-accent2:#1f6b5b; --lr-mute:#8a866f;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+#lr-mono, .lr-mono { font-family: "Berkeley Mono","JetBrains Mono",ui-monospace,Menlo,monospace; }
+
+/* highlight that survives focus moving to the textarea */
+::highlight(lr-sel) { background:#ffe08a; color:#16180f; }
+
+/* per-block comment button */
+.lr-on { position: relative; }
+.lr-btn {
+  position:absolute; left:-28px; top:1px; width:22px; height:22px; border-radius:50%;
+  border:1px solid var(--lr-line); background:#fff; color:var(--lr-accent); cursor:pointer;
+  font-size:12px; line-height:1; opacity:0; transition:opacity .12s, transform .12s;
+  box-shadow:0 6px 16px -8px #0007; display:grid; place-items:center; z-index:2147483600; padding:0;
+}
+.lr-on:hover > .lr-btn { opacity:.8; }
+.lr-btn:hover { opacity:1!important; transform:scale(1.15); }
+.lr-btn.lr-has { opacity:1; background:var(--lr-accent); color:#fff; }
+@media (max-width:1100px){ .lr-btn{ left:auto; right:-2px; top:-10px; } }
+
+/* side panel */
+#lr-panel {
+  position:fixed; top:14px; right:14px; width:300px; max-height:calc(100vh - 28px); z-index:2147483601;
+  background:var(--lr-paper); border:1px solid var(--lr-line); border-radius:12px; box-shadow:0 18px 50px -20px #0009;
+  display:flex; flex-direction:column; overflow:hidden; color:var(--lr-ink);
+}
+#lr-panel.lr-min { width:auto; }
+#lr-panel.lr-min .lr-body { display:none; }
+#lr-head { display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid var(--lr-line); cursor:default; }
+#lr-dot { width:9px; height:9px; border-radius:50%; background:#c33; box-shadow:0 0 0 3px #c331; flex:none; }
+#lr-dot.lr-up { background:#2a9d6a; box-shadow:0 0 0 3px #2a9d6a22; }
+#lr-head b { font:600 12px/1 "Berkeley Mono",ui-monospace,monospace; letter-spacing:.04em; }
+#lr-head .lr-tag { margin-left:auto; font:10px/1 "Berkeley Mono",ui-monospace,monospace; text-transform:uppercase; letter-spacing:.07em; color:var(--lr-mute); }
+#lr-toggle { background:none; border:none; cursor:pointer; font-size:13px; color:var(--lr-mute); padding:2px 4px; }
+.lr-body { overflow:auto; padding:6px; }
+.lr-item { padding:9px 11px; border-radius:8px; margin:4px 2px; background:#fff; border:1px solid #ece3c9; font-size:13px; }
+.lr-where { display:flex; justify-content:space-between; align-items:baseline; gap:8px; font:10px/1.3 "Berkeley Mono",ui-monospace,monospace;
+            text-transform:uppercase; letter-spacing:.06em; color:var(--lr-accent2); cursor:pointer; }
+.lr-where .lr-goto { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lr-when { flex:none; color:#b3ad92; }
+.lr-quote { font-style:italic; color:var(--lr-mute); border-left:2px solid var(--lr-line); padding-left:8px; margin:6px 0 0; font-size:12px; }
+.lr-txt { margin:4px 0 0; white-space:pre-wrap; }
+.lr-reply { margin:8px 0 0; padding:7px 9px; background:#e6f3ee; border-radius:7px; font-size:12.5px; }
+.lr-reply b { color:var(--lr-accent2); font:10px/1 "Berkeley Mono",ui-monospace,monospace; text-transform:uppercase; letter-spacing:.05em; margin-right:6px; }
+.lr-empty { padding:16px 12px; color:var(--lr-mute); font-size:12.5px; text-align:center; }
+.lr-item.lr-resolved { opacity:.6; }
+.lr-item.lr-resolved .lr-txt { text-decoration:line-through; text-decoration-color:var(--lr-ink-4); }
+.lr-where .lr-moved { color:var(--lr-accent); }
+.lr-btn.lr-btn-resolved { background:#fff; color:var(--lr-accent2); border-color:var(--lr-accent2); }
+
+/* composer */
+#lr-composer {
+  position:fixed; z-index:2147483602; width:312px; background:var(--lr-paper); border:1px solid var(--lr-line);
+  border-radius:12px; box-shadow:0 20px 54px -16px #000a; padding:13px; display:none; color:var(--lr-ink);
+}
+#lr-composer.lr-show { display:block; }
+#lr-anchor { font:10px/1.2 "Berkeley Mono",ui-monospace,monospace; text-transform:uppercase; letter-spacing:.06em; color:var(--lr-accent2); margin-bottom:5px; }
+#lr-qrow { display:flex; align-items:flex-start; gap:8px; }
+#lr-quote { flex:1 1 auto; margin:0 0 8px; font-style:italic; color:var(--lr-mute); font-size:12px; max-height:58px; overflow:auto; }
+#lr-copy { flex:none; background:#fff; border:1px solid var(--lr-line); border-radius:6px; cursor:pointer; padding:3px 8px;
+           font:11px/1 "Berkeley Mono",ui-monospace,monospace; color:var(--lr-accent2); white-space:nowrap; }
+#lr-copy:hover { background:#f3eeda; }
+#lr-copy.lr-done { color:#2a9d6a; border-color:#2a9d6a; background:#e6f3ee; }
+#lr-text { width:100%; min-height:82px; resize:vertical; border:1px solid var(--lr-line); border-radius:8px; padding:9px;
+           font:14px/1.5 ui-sans-serif,system-ui,sans-serif; background:#fff; color:var(--lr-ink); }
+#lr-row { display:flex; gap:8px; margin-top:9px; }
+#lr-send { background:var(--lr-accent); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-weight:600; cursor:pointer; }
+#lr-cancel { background:transparent; border:1px solid var(--lr-line); border-radius:8px; padding:8px 12px; cursor:pointer; color:var(--lr-ink); }
+#lr-toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(18px); background:var(--lr-ink); color:#fff;
+            padding:10px 16px; border-radius:999px; font:13px/1 "Berkeley Mono",ui-monospace,monospace; opacity:0; transition:.25s; z-index:2147483603; }
+#lr-toast.lr-show { opacity:1; transform:translateX(-50%) translateY(0); }
