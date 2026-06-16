@@ -17,7 +17,7 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { ListToolsRequestSchema, CallToolRequestSchema } from "@modelcontextprotocol/sdk/types.js";
-import { readFile, writeFile } from "fs/promises";
+import { readFile, writeFile, mkdir } from "fs/promises";
 import { watch } from "fs";
 import { join, dirname, basename } from "path";
 
@@ -26,9 +26,15 @@ const PORT = Number(Bun.env.PORT ?? 4399);
 const LR_DIR = Bun.env.LR_DIR || import.meta.dir;
 const ASSETS = join(LR_DIR, "assets");
 if (!TARGET) { console.error("live-review: TARGET env (HTML file path) is required"); process.exit(1); }
-const STORE = TARGET + ".live-review.json";
 
-type Comment = { id: string; anchor: string; section_title: string; quote: string; text: string; at: string; reply?: string };
+// Comments live in the skill's own .run/ dir keyed by a hash of the target path —
+// never a sidecar file dropped into the directory of the file under review.
+const RUN_DIR = join(LR_DIR, ".run");
+const keyHash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+const STORE = join(RUN_DIR, `${keyHash(TARGET)}.comments.json`);
+await mkdir(RUN_DIR, { recursive: true }).catch(() => {});
+
+type Comment = { id: string; anchor: string; section_title: string; quote: string; text: string; at: string; reply?: string; resolved?: boolean };
 const comments: Comment[] = [];
 let seq = 1;
 try { const s = JSON.parse(await readFile(STORE, "utf8")); if (Array.isArray(s)) { comments.push(...s); seq = comments.length + 1; } } catch {}
@@ -51,27 +57,29 @@ const mcp = new Server(
       `<channel source="live-review" comment_id="..." section="..." anchor="..."> with the reviewer's ` +
       `note as the body (plus an optional quoted passage). For each: make the requested change by editing ` +
       `${TARGET} directly (the viewer hot-reloads), then call the \`reply\` tool with the comment_id to tell ` +
-      `the reviewer what you changed. If a comment is a question, answer via \`reply\` without editing.`,
+      `the reviewer what you changed, passing resolved:true once it is fully addressed. If a comment is a ` +
+      `question, answer via \`reply\` with resolved:true without editing.`,
   },
 );
 
 mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [{
     name: "reply",
-    description: "Post a reply that appears under a specific comment in the reviewer's browser.",
+    description: "Post a reply under a specific comment in the reviewer's browser, and optionally mark it resolved once addressed.",
     inputSchema: { type: "object",
       properties: { comment_id: { type: "string", description: "comment_id from the <channel> tag" },
-                    text: { type: "string", description: "your reply to the reviewer" } },
+                    text: { type: "string", description: "your reply to the reviewer" },
+                    resolved: { type: "boolean", description: "set true once the comment is fully addressed (edit made or question answered)" } },
       required: ["comment_id", "text"] },
   }],
 }));
 mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
   if (req.params.name === "reply") {
-    const { comment_id, text } = req.params.arguments as { comment_id: string; text: string };
+    const { comment_id, text, resolved } = req.params.arguments as { comment_id: string; text: string; resolved?: boolean };
     const c = comments.find(x => x.id === comment_id);
     if (!c) return { content: [{ type: "text", text: `no comment ${comment_id}` }], isError: true };
-    c.reply = text; await persist();
-    return { content: [{ type: "text", text: `reply posted under ${comment_id}` }] };
+    c.reply = text; if (resolved) c.resolved = true; await persist();
+    return { content: [{ type: "text", text: `reply posted under ${comment_id}${resolved ? " (resolved)" : ""}` }] };
   }
   throw new Error(`unknown tool: ${req.params.name}`);
 });

@@ -2,7 +2,9 @@
 # live-review: spin up a Claude Code channel session that serves an HTML file with a
 # comment widget, and handles comments by editing the file + replying in-page.
 #
-#   start.sh /abs/path/to/output.html
+#   start.sh /abs/path/to/output.html     # start (or reopen) a review
+#   start.sh --stop  /abs/path/to/file    # tear down that review (session + port)
+#   start.sh --list                       # list active review sessions
 #
 # Fully scripted: launches a SECOND `claude` session in tmux (channels can only load at
 # startup, so the reviewer loop is a separate Claude instance — by design), auto-confirms
@@ -10,19 +12,36 @@
 set -euo pipefail
 
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# stable session name + port per target file (re-running the same file reuses them)
+sid()   { echo "lr-$(basename "${1%.*}" | tr -c 'a-zA-Z0-9' '-' | cut -c1-24)"; }
+sport() { echo $(( 4300 + $(echo -n "$1" | cksum | cut -d' ' -f1) % 200 )); }
+abspath() { echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"; }
+
+case "${1:-}" in
+  --list)
+    echo "active live-review sessions:"
+    tmux ls 2>/dev/null | grep '^lr-' || echo "  (none)"
+    exit 0 ;;
+  --stop)
+    f="${2:-}"; [ -z "$f" ] && { echo "usage: start.sh --stop <file.html>"; exit 1; }
+    f="$(abspath "$f")"; s="$(sid "$f")"; p="$(sport "$f")"
+    tmux kill-session -t "$s" 2>/dev/null && echo "stopped session $s" || echo "no session $s"
+    lsof -ti:"$p" 2>/dev/null | xargs kill 2>/dev/null && echo "freed port $p" || true
+    exit 0 ;;
+esac
+
 TARGET="${1:-}"
-[ -z "$TARGET" ] && { echo "usage: start.sh <file.html>"; exit 1; }
-TARGET="$(cd "$(dirname "$TARGET")" && pwd)/$(basename "$TARGET")"   # absolutize
+[ -z "$TARGET" ] && { echo "usage: start.sh <file.html> | --stop <file> | --list"; exit 1; }
+TARGET="$(abspath "$TARGET")"
 [ -f "$TARGET" ] || { echo "no such file: $TARGET"; exit 1; }
 DIR="$(dirname "$TARGET")"
 
 # deps
 [ -d "$SKILL_DIR/node_modules/@modelcontextprotocol" ] || ( cd "$SKILL_DIR" && bun install >/dev/null 2>&1 )
 
-# stable port + session per file (re-running the same file reuses them)
-H=$(echo -n "$TARGET" | cksum | cut -d' ' -f1)
-PORT=$(( 4300 + H % 200 ))
-SESSION="lr-$(basename "${TARGET%.*}" | tr -c 'a-zA-Z0-9' '-' | cut -c1-24)"
+PORT="$(sport "$TARGET")"
+SESSION="$(sid "$TARGET")"
 
 # already running for this file? just reopen.
 if tmux has-session -t "$SESSION" 2>/dev/null && curl -s -o /dev/null "http://localhost:$PORT/_lr/whoami"; then
@@ -57,7 +76,8 @@ for i in $(seq 1 12); do
   sleep 1.5
   P="$(tmux capture-pane -t "$SESSION" -p 2>/dev/null || true)"
   echo "$P" | grep -q "Channels (experimental)" && break
-  echo "$P" | grep -Eq "development channels|Use this MCP|trust|❯ 1|Yes" && tmux send-keys -t "$SESSION" Enter
+  # only confirm the two specific startup prompts — don't blanket-Enter arbitrary screens
+  echo "$P" | grep -Eq "I am using this for local development|New MCP server found|Use this MCP server" && tmux send-keys -t "$SESSION" Enter
 done
 
 # nudge the reviewer session into action (channel instructions already loaded)

@@ -120,25 +120,45 @@
   // ---- render (newest first, short muted time) ----
   const timeAgo = at => { const t=Date.parse(at); if(isNaN(t)) return ""; const s=Math.max(0,(Date.now()-t)/1000);
     return s<45?"now":s<3600?Math.round(s/60)+"m":s<86400?Math.round(s/3600)+"h":Math.round(s/86400)+"d"; };
+  // re-find a comment's block: by content-hash anchor, else by searching for its quote
+  // (so a comment survives the reviewer rewording the block it was hashed from).
+  function findAnchorEl(c){
+    if (c.anchor){ const el = document.querySelector(`[data-lr="${c.anchor}"]`); if (el) return el; }
+    const q = (c.quote||"").replace(/\s+/g," ").trim();
+    if (q.length >= 3){
+      for (const b of document.querySelectorAll(SEL)){
+        if (b.closest("#lr-root")) continue;
+        if ((b.textContent||"").replace(/\s+/g," ").includes(q)) return b;
+      }
+    }
+    return null;
+  }
   async function load(){
     let list=[]; try { list = await (await fetch("/_lr/comments")).json(); } catch {}
-    document.querySelectorAll(".lr-btn.lr-has").forEach(b=>b.classList.remove("lr-has"));
-    const counts={}; list.forEach(c=>counts[c.anchor]=(counts[c.anchor]||0)+1);
-    Object.keys(counts).forEach(a=>{ const b=document.querySelector(`[data-lr="${a}"] .lr-btn`); if(b){ b.classList.add("lr-has"); b.textContent="💬"; }});
+    document.querySelectorAll(".lr-btn.lr-has").forEach(b=>{ b.classList.remove("lr-has","lr-btn-resolved"); b.textContent="＋"; });
+    list.forEach(c=>{ const el=findAnchorEl(c); const b=el&&el.querySelector(":scope > .lr-btn");
+      if(b){ b.classList.add("lr-has"); b.textContent = c.resolved ? "✓" : "💬"; if(c.resolved) b.classList.add("lr-btn-resolved"); }});
     const box=$("#lr-list");
     if(!list.length){ box.innerHTML = `<div class="lr-empty">No comments yet. Select text, or hover a block and click ＋.</div>`; return; }
-    box.innerHTML = [...list].reverse().map(c=>`
-      <div class="lr-item">
-        <div class="lr-where" data-go="${esc(c.anchor)}">
-          <span class="lr-goto">▸ ${esc(fmtWhere(c.anchor))}</span><span class="lr-when">${timeAgo(c.at)}</span>
+    box.innerHTML = [...list].reverse().map(c=>{
+      const moved = !findAnchorEl(c);
+      const label = esc(c.section_title || c.anchor || "");
+      return `
+      <div class="lr-item${c.resolved?' lr-resolved':''}">
+        <div class="lr-where" data-cid="${esc(c.id)}">
+          <span class="lr-goto">${c.resolved?'✓ ':'▸ '}${label}</span>
+          <span class="lr-when">${moved?'<span class="lr-moved">⚠ moved</span> ':''}${timeAgo(c.at)}</span>
         </div>
         ${c.quote?`<div class="lr-quote">“${esc(c.quote)}”</div>`:""}
         <div class="lr-txt">${esc(c.text)}</div>
-        ${c.reply?`<div class="lr-reply"><b>Claude</b> ${esc(c.reply)}</div>`:""}
-      </div>`).join("");
-    box.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>{
-      const t=document.querySelector(`[data-lr="${el.dataset.go}"]`);
-      if(t){ t.scrollIntoView({behavior:"smooth",block:"center"}); const o=t.style.outline; t.style.outline="2px solid var(--lr-accent)"; setTimeout(()=>t.style.outline=o,1200); }
+        ${c.reply?`<div class="lr-reply"><b>Claude${c.resolved?' · resolved':''}</b> ${esc(c.reply)}</div>`:""}
+      </div>`;
+    }).join("");
+    box.querySelectorAll("[data-cid]").forEach(elr=>elr.onclick=()=>{
+      const c=list.find(x=>x.id===elr.dataset.cid); if(!c) return;
+      const t=findAnchorEl(c); if(!t){ toast("anchor no longer in the page"); return; }
+      t.scrollIntoView({behavior:"smooth",block:"center"}); const o=t.style.outline;
+      t.style.outline="2px solid var(--lr-accent)"; setTimeout(()=>t.style.outline=o,1200);
     });
   }
 

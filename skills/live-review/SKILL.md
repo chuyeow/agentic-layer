@@ -54,13 +54,27 @@ cannot turn itself into a channel receiver. So:
 
 Requires: `bun`, `tmux`, `claude` on PATH.
 
-## Stopping
+## Stopping & listing
 
 ```bash
-tmux kill-session -t <session>     # name was printed at startup (lr-<filename>)
+bash ~/.claude/skills/live-review/start.sh --stop <file.html>   # tear down session + free port
+bash ~/.claude/skills/live-review/start.sh --list               # list active review sessions
 ```
 
-Comments persist to `<file>.live-review.json`, so stopping and restarting keeps the panel.
+Comments persist in the skill's own `.run/` dir (keyed by a hash of the target path), so
+stopping and restarting keeps the panel — and nothing is ever written into the directory
+of the file under review.
+
+## Resolved comments
+
+The reviewer's `reply` tool takes an optional `resolved` flag. When Claude has fully
+addressed a comment (made the edit or answered the question), it replies with
+`resolved: true`; the widget then greys + strikes that comment and flips its in-page
+marker to ✓. Open comments stay highlighted so the loop is visually closed.
+
+If the reviewer rewords the exact block a comment was anchored to, the widget re-finds it
+by the quoted passage; if it can't, the comment shows `⚠ moved` rather than silently
+detaching.
 
 ## Optional: auto-trigger on draft HTML (opt-in hook)
 
