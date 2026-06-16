@@ -1,7 +1,14 @@
 ---
 name: persona-reader-site
 description: Build a single-file reading site for any person or company from their tweets (ranked by engagement) and long-form writing (blogs, Medium, RSS). Use when the user says "build/refresh a reader site for <person/company>", "scrape <handle>'s tweets and writing into a site", "make Karpathy's writing easier to read", "turn <someone>'s posts into a mini site", or wants a personal index of someone's public output. Backed by Camoufox (stealth Firefox) + a logged-in X profile.
+allowed-tools: Bash(curl:*)
 ---
+
+> **Permissions note**: `allowed-tools` auto-approves `curl` only *while this skill is
+> active* (scoped to the skill lifecycle, not session-wide) — used to fetch RSS/HTML for
+> writing sources. The `uvx`/`python3` scrape + build steps are intentionally NOT
+> pre-approved; they prompt per run. To auto-approve those too, add them here, but note
+> they are broad capabilities (arbitrary PyPI execution / arbitrary code).
 
 # persona-reader-site
 
@@ -44,9 +51,12 @@ Output: `<out_dir>/index.html` (single file, data embedded, no server needed).
     "handles": ["karpathy"],          // [] => no tweets tab; site = writing only
     "tabs": ["profile", "highlights"],// "highlights" = X's own top-tweet curation
     "search_slices": [],              // optional: [{label, query, max_rounds}]
-    "backfill_min_len": 250           // tweets >= this many chars get full-text re-fetch
+    "backfill_min_len": 250,          // tweets >= this many chars get full-text re-fetch
+    "backfill_passes": 4,             // auto-retry passes for rate-limited misses
+    "exclude": []                     // any of: "replies", "reposts" (filtered at build)
   },
   "writing": [                        // any mix; runs in order
+    { "type": "sitemap", "url": "https://site.com/sitemap.xml", "path_pattern": "/blog/", "limit": 150 },
     { "type": "github_pages", "url": "https://karpathy.github.io/" },
     { "type": "bearblog",     "url": "https://karpathy.bearblog.dev/blog/" },
     { "type": "medium",       "handle": "karpathy" },
@@ -56,12 +66,17 @@ Output: `<out_dir>/index.html` (single file, data embedded, no server needed).
 }
 ```
 
-**Writing source types**:
+**Writing source types** (prefer `sitemap` for full archives, `rss` for a quick recent slice):
+- `sitemap` — **best for full archives.** Reads `sitemap.xml` (follows nested sitemap indexes, depth/fetch-capped), keeps URLs matching `path_pattern` (regex, e.g. `/blog/`), newest-first by `<lastmod>`. Options: `limit` (default 100), `fetch_pages` (default false — when true, fetches each page for a real `<h1>` title + excerpt + word count; leave false for large archives, titles are then slug-derived), `sitemap_stem` (override which sub-sitemaps to descend; defaults to the alphanumeric stem of `path_pattern`). Fixes the recency cap that RSS/JS-indexes hit.
 - `github_pages` — Jekyll-style index, post links like `/YYYY/MM/DD/slug/`. Date from URL, word count + excerpt from each page.
 - `bearblog` — bearblog.dev index (`<time datetime>` + link). Word count + excerpt.
 - `medium` — Cloudflare-gated, so uses Camoufox; scrolls the profile, reads post cards.
-- `rss` — **universal fallback, best for companies.** Parses RSS 2.0 `<item>` or Atom `<entry>`. Most blogs expose a feed; prefer this when unsure.
+- `rss` — universal but **usually capped to the latest ~10–20 items** (e.g. WordPress). Good for a quick recent slice; use `sitemap` when you want the whole back-catalogue.
 - `generic` — supply a `link_pattern` regex with two groups `(href, title)`. Last resort.
+
+**Tweet quality knobs**:
+- `exclude: ["replies","reposts"]` — drop the account's replies and/or reposts (filtered at *build* time from cached `social`/`reply` flags, so toggling just needs a rebuild, no re-scrape). Useful for noisy brand/active accounts. Note: reposts of *other* people are already excluded by handle-matching; this mainly catches replies and self-quote noise.
+- `backfill` auto-retries rate-limited misses across `backfill_passes` passes and records genuine no-text tweets (media/quote) in `nofull.json` so they aren't chased forever or flagged as "truncated". No more manual re-runs.
 
 ## Prerequisites
 
@@ -108,8 +123,9 @@ python3 scripts/reader.py build   --config presets/karpathy.json
 ```
 
 The `x` and `backfill` steps are long (minutes) and hit X rate limits — run them
-**in the background**, and re-run `backfill` 1-2 more times to mop up MISSes
-(it resumes from the checkpoint). Then `build`.
+**in the background**. `backfill` now auto-retries misses across `backfill_passes`
+passes (resuming from the checkpoint) and stops once it makes no progress, so a single
+invocation is enough. Then `build`.
 
 ## Refreshing
 
@@ -131,7 +147,8 @@ To force a clean rebuild, delete `~/.cache/persona-reader/<slug>/`.
   default). `highlights` is X's own curation of the account's top tweets — good
   popularity signal for older years the timeline won't scroll back to.
 - Tweets longer than ~280 chars are truncated in timeline DOM; `backfill` opens each
-  status page for full text. The few that never resolve are flagged "truncated" in the UI.
+  status page for full text. Genuine media/quote tweets (no longer text) are recorded in
+  `nofull.json` and NOT flagged "truncated"; only true unresolved fetches get the flag.
 - Camoufox's `emulate_media(color_scheme=...)` errors on this build — to screenshot dark
   mode, set `document.documentElement.style.colorScheme='dark'` via `page.evaluate`.
 - Design: warm-paper kissaten palette, Newsreader + JetBrains Mono, `light-dark()` auto

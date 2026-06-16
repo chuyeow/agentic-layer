@@ -1,0 +1,16 @@
+{
+  "slug": "travala",
+  "name": "Travala.com",
+  "title": "Travala Reader",
+  "subtitle": "The crypto travel company — blog posts plus the brand's tweets, in one place.",
+  "out_dir": "~/code/travala-site",
+  "x": {
+    "handles": ["travalacom"],
+    "tabs": ["profile", "highlights"],
+    "search_slices": [],
+    "backfill_min_len": 250
+  },
+  "writing": [
+    { "type": "sitemap", "url": "https://www.travala.com/sitemap.xml", "path_pattern": "/blog/", "label": "travala.com/blog", "limit": 150 }
+  ]
+}

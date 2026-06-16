@@ -35,6 +35,8 @@ def load_config(path):
     cfg["x"].setdefault("tabs", ["profile", "highlights"])
     cfg["x"].setdefault("search_slices", [])
     cfg["x"].setdefault("backfill_min_len", 250)
+    cfg["x"].setdefault("exclude", [])          # any of: "replies", "reposts"
+    cfg["x"].setdefault("backfill_passes", 4)   # auto-retry passes for rate-limited misses
     cfg.setdefault("writing", [])
     return cfg
 
@@ -70,7 +72,10 @@ EXTRACT_TL = r"""() => {
     const metrics = grp ? (grp.getAttribute('aria-label') || '') : '';
     const tt = a.querySelector('[data-testid="tweetText"]');
     const body = tt ? tt.innerText : '';
-    return {id, dt, handle, link, metrics, text: body || a.innerText};
+    const sc = a.querySelector('[data-testid="socialContext"]');
+    const social = sc ? sc.innerText : '';
+    const reply = /(^|\n)Replying to /.test(a.innerText);
+    return {id, dt, handle, link, metrics, social, reply, text: body || a.innerText};
   });
 }"""
 
@@ -154,38 +159,62 @@ def likes_of(m):
     x = re.search(r'(\d+) likes', m); return int(x.group(1)) if x else 0
 
 def cmd_backfill(cfg):
+    """Re-fetch full text for truncated tweets. Auto-retries rate-limited misses
+    across several passes; tweets that return text but no *longer* text are
+    recorded as permanent no-fulltext (media/quote tweets) and not retried."""
     handles = [h.lstrip("@").lower() for h in cfg["x"]["handles"]]
     if not handles: return
     primary = handles[0]
     tweets = json.load(open(cpath(cfg, "tweets.json")))
     ft_path = cpath(cfg, "fulltext.json")
+    nf_path = cpath(cfg, "nofull.json")
     done = json.load(open(ft_path)) if os.path.exists(ft_path) else {}
+    nofull = set(json.load(open(nf_path))) if os.path.exists(nf_path) else set()
     minlen = cfg["x"]["backfill_min_len"]
-    cand = [r for r in tweets if len(r["text"]) >= minlen and r["id"] not in done]
-    cand.sort(key=lambda r: likes_of(r["metrics"]), reverse=True)
-    log(f"{len(cand)} to fetch, {len(done)} already done")
-    if not cand: return
+
+    def remaining():
+        c = [r for r in tweets
+             if len(r["text"]) >= minlen and r["id"] not in done and r["id"] not in nofull]
+        c.sort(key=lambda r: likes_of(r["metrics"]), reverse=True)
+        return c
+
+    max_passes = cfg["x"]["backfill_passes"]
     with camoufox(headless=True, profile=X_PROFILE) as ctx:
         page = ctx.pages[0] if ctx.pages else ctx.new_page()
         page.on("pageerror", lambda e: None)
         page.set_viewport_size({"width": 1366, "height": 950})
-        for i, r in enumerate(cand):
-            url = f"https://x.com/{primary}/status/{r['id']}"
-            try:
-                page.goto(url, wait_until="domcontentloaded", timeout=45000)
-                page.wait_for_timeout(3500)
-                txt = page.evaluate(EXTRACT_FULL, r["id"])
-                if txt and len(txt) >= len(r["text"]) - 30:
-                    done[r["id"]] = txt
-                    log(f"{i+1}/{len(cand)} {r['id']} ok ({len(txt)})")
-                else:
-                    log(f"{i+1}/{len(cand)} {r['id']} MISS")
-            except Exception as e:
-                log(f"{i+1}/{len(cand)} {r['id']} ERR {e}")
-            if (i + 1) % 10 == 0:
-                json.dump(done, open(ft_path, "w"), ensure_ascii=False)
+        prev_left = None
+        for p in range(max_passes):
+            cand = remaining()
+            log(f"pass {p+1}/{max_passes}: {len(cand)} to fetch, "
+                f"{len(done)} done, {len(nofull)} no-fulltext")
+            if not cand: break
+            if prev_left is not None and len(cand) >= prev_left:
+                log("no progress vs previous pass — stopping"); break
+            prev_left = len(cand)
+            for i, r in enumerate(cand):
+                url = f"https://x.com/{primary}/status/{r['id']}"
+                try:
+                    page.goto(url, wait_until="domcontentloaded", timeout=45000)
+                    page.wait_for_timeout(3500)
+                    txt = page.evaluate(EXTRACT_FULL, r["id"])
+                    if txt and len(txt) >= len(r["text"]) - 30:
+                        done[r["id"]] = txt
+                        log(f"  {i+1}/{len(cand)} {r['id']} ok ({len(txt)})")
+                    elif txt is not None:
+                        # page rendered but no longer text => media/quote, permanent
+                        nofull.add(r["id"]); log(f"  {i+1}/{len(cand)} {r['id']} no-fulltext")
+                    else:
+                        log(f"  {i+1}/{len(cand)} {r['id']} MISS (retry next pass)")
+                except Exception as e:
+                    log(f"  {i+1}/{len(cand)} {r['id']} ERR {e}")
+                if (i + 1) % 10 == 0:
+                    json.dump(done, open(ft_path, "w"), ensure_ascii=False)
+                    json.dump(sorted(nofull), open(nf_path, "w"))
     json.dump(done, open(ft_path, "w"), ensure_ascii=False)
-    log(f"==== backfill DONE: {len(done)} fulltexts")
+    json.dump(sorted(nofull), open(nf_path, "w"))
+    log(f"==== backfill DONE: {len(done)} fulltexts, {len(nofull)} no-fulltext, "
+        f"{len(remaining())} still missing")
 
 # ---------------------------------------------------------------- subcommand: writing
 def curl(url):
@@ -333,8 +362,80 @@ def src_generic(src):
         log(f"  generic: {title}")
     return posts
 
+def title_from_slug(url):
+    seg = [s for s in url.rstrip("/").split("/") if s]
+    slug = seg[-1] if seg else url
+    slug = re.sub(r'\.(html?|php)$', '', slug)
+    slug = re.sub(r'^\d{4}-\d{2}-\d{2}-', '', slug)           # strip date prefix
+    return re.sub(r'[-_]+', ' ', slug).strip().title()
+
+def src_sitemap(src):
+    """Full-archive path: read sitemap.xml (or a sitemap index, one level deep),
+    keep <loc>s matching path_pattern, newest-first by <lastmod>.
+
+    Config: {type:"sitemap", url, path_pattern (regex), limit?, fetch_pages?}
+    - path_pattern: keep only URLs whose path matches (e.g. "/blog/", "/\\d{4}/").
+    - fetch_pages (default false): pull each page for <h1> title + excerpt + word
+      count. Leave false for large archives (title derived from slug, no excerpt).
+    """
+    root = re.match(r'https?://[^/]+', src["url"]).group(0)
+    label = src.get("label", root.split("//")[1])
+    pat = re.compile(src.get("path_pattern", "."))
+    limit = src.get("limit", 100)
+    fetch_pages = src.get("fetch_pages", False)
+
+    def pathmatch(u): return bool(pat.search(re.sub(r'https?://[^/]+', '', u)))
+    # stem for choosing which sub-sitemaps to descend (final-page URLs use a "/blog/"
+    # path while their sitemap files are often "blog_post.xml" — same stem, no slash)
+    stem = src.get("sitemap_stem") or re.sub(r'[^a-z0-9]', '', src.get("path_pattern", "").lower())
+
+    def url_entries(xml):
+        out = []
+        for block in re.findall(r'<url\b[\s\S]*?</url>', xml):
+            loc = re.search(r'<loc>\s*([^<]+?)\s*</loc>', block)
+            lm = re.search(r'<lastmod>\s*([^<]+?)\s*</lastmod>', block)
+            if loc: out.append((loc.group(1), normalize_date(lm.group(1)) if lm else ""))
+        return out
+
+    # BFS over (possibly nested) sitemap indexes. Recurse only into child sitemaps whose
+    # URL contains the stem (so we skip unrelated trees: hotels, cities, …). Final <url>
+    # entries are kept only if their path matches path_pattern. Depth/fetch capped.
+    entries = []; queue = [(src["url"], 0)]; fetched = 0
+    while queue and fetched < 40:
+        sm_url, depth = queue.pop(0)
+        xml = curl(sm_url); fetched += 1
+        entries += url_entries(xml)
+        if depth < 3:
+            children = re.findall(r'<sitemap\b[\s\S]*?<loc>\s*([^<]+?)\s*</loc>', xml)
+            matched = [c for c in children if stem and stem in c.lower()]
+            for c in (matched or (children if depth == 0 else [])):
+                queue.append((c, depth + 1))
+
+    seen = set(); picked = []
+    for url, date in entries:
+        path = re.sub(r'https?://[^/]+', '', url)
+        if not pat.search(path) or url in seen: continue
+        seen.add(url); picked.append((url, date))
+    picked.sort(key=lambda x: x[1] or "0000", reverse=True)
+    picked = picked[:limit]
+
+    posts = []
+    for url, date in picked:
+        rec = {"source": label, "title": title_from_slug(url), "url": url,
+               "date": date, "words": None, "excerpt": ""}
+        if fetch_pages:
+            html = curl(url); body = strip_tags(html)
+            h1 = re.search(r'<h1[^>]*>([\s\S]*?)</h1>', html)
+            if h1: rec["title"] = strip_tags(h1.group(1)) or rec["title"]
+            rec["words"] = len(body.split())
+            rec["excerpt"] = excerpt_after_title(body, rec["title"])
+        posts.append(rec); log(f"  sitemap: {rec['title']}")
+    return posts
+
+
 SRC_FN = {"github_pages": src_github_pages, "bearblog": src_bearblog,
-          "rss": src_rss, "medium": src_medium, "generic": src_generic}
+          "rss": src_rss, "medium": src_medium, "generic": src_generic,
+          "sitemap": src_sitemap}
 
 def cmd_writing(cfg):
     posts = []
@@ -360,14 +461,21 @@ def cmd_build(cfg):
     tweets = json.load(open(tw_path)) if os.path.exists(tw_path) else []
     ft_path = cpath(cfg, "fulltext.json")
     fulltext = json.load(open(ft_path)) if os.path.exists(ft_path) else {}
+    nf_path = cpath(cfg, "nofull.json")
+    nofull = set(json.load(open(nf_path))) if os.path.exists(nf_path) else set()
     wr_path = cpath(cfg, "writing.json")
     writing = json.load(open(wr_path)) if os.path.exists(wr_path) else []
 
+    exclude = set(cfg["x"].get("exclude", []))
     rows = []
     for t in tweets:
+        if "replies" in exclude and t.get("reply"): continue
+        if "reposts" in exclude and re.search(r'\brepost', t.get("social", ""), re.I): continue
         mm = parse_metrics(t["metrics"])
         body = fulltext.get(t["id"], t["text"])
-        trunc = t["id"] not in fulltext and len(t["text"]) >= cfg["x"]["backfill_min_len"]
+        # truncated only if we never got full text AND it isn't a known media/quote tweet
+        trunc = (t["id"] not in fulltext and t["id"] not in nofull
+                 and len(t["text"]) >= cfg["x"]["backfill_min_len"])
         link = t["link"]
         if link.startswith("/"): link = "https://x.com" + link
         rows.append({"id": t["id"], "dt": t["dt"][:10], "link": link, "text": body,
