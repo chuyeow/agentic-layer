@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Video Recording"
+  short_description: "Record PR-ready verification demos."
+  default_prompt: "Create a video recording that proves this change works and produce a PR-ready Verification snippet."

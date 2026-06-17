@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}}</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f5f1e8;
+      color: #211f1b;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 40px 24px 56px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 36px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+    .meta {
+      color: #696257;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13px;
+      margin-bottom: 28px;
+    }
+    video, img {
+      width: 100%;
+      border: 1px solid #d6cbb9;
+      background: #fff;
+    }
+    section {
+      margin-top: 28px;
+    }
+    pre {
+      white-space: pre-wrap;
+      background: #fffaf0;
+      border: 1px solid #d6cbb9;
+      padding: 16px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{{TITLE}}</h1>
+    <div class="meta">{{META}}</div>
+    {{MEDIA}}
+    <section>
+      <h2>Scenario</h2>
+      <p>{{SCENARIO}}</p>
+    </section>
+    <section>
+      <h2>Verification Snippet</h2>
+      <pre>{{SNIPPET}}</pre>
+    </section>
+  </main>
+</body>
+</html>
