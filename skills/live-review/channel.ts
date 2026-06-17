@@ -25,6 +25,7 @@ const TARGET = Bun.env.TARGET || "";
 const PORT = Number(Bun.env.PORT ?? 4399);
 const LR_DIR = Bun.env.LR_DIR || import.meta.dir;
 const ASSETS = join(LR_DIR, "assets");
+const SESSION = Bun.env.SESSION || "";  // tmux session name, for the in-page "watch" hint
 if (!TARGET) { console.error("live-review: TARGET env (HTML file path) is required"); process.exit(1); }
 
 // Comments live in the skill's own .run/ dir keyed by a hash of the target path —
@@ -94,7 +95,7 @@ const server = Bun.serve({
     if (url.pathname === "/_lr/ws") { if (srv.upgrade(req)) return; return new Response("ws fail", { status: 400 }); }
     if (url.pathname === "/_lr/widget.js") return new Response(Bun.file(join(ASSETS, "widget.js")), { headers: { "Content-Type": "text/javascript" } });
     if (url.pathname === "/_lr/widget.css") return new Response(Bun.file(join(ASSETS, "widget.css")), { headers: { "Content-Type": "text/css" } });
-    if (url.pathname === "/_lr/whoami") return Response.json({ mechanism: "claude-channel", target: basename(TARGET) });
+    if (url.pathname === "/_lr/whoami") return Response.json({ mechanism: "claude-channel", target: basename(TARGET), session: SESSION });
     if (url.pathname === "/_lr/comments") return Response.json(comments);
 
     if (url.pathname === "/_lr/comment" && req.method === "POST") {

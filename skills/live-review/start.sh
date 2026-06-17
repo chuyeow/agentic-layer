@@ -55,7 +55,7 @@ RUN="$SKILL_DIR/.run"; mkdir -p "$RUN"
 CFG="$RUN/$SESSION.mcp.json"
 cat > "$CFG" <<JSON
 { "mcpServers": { "live-review": { "command": "bun", "args": ["$SKILL_DIR/channel.ts"],
-  "env": { "TARGET": "$TARGET", "PORT": "$PORT", "LR_DIR": "$SKILL_DIR" } } } }
+  "env": { "TARGET": "$TARGET", "PORT": "$PORT", "LR_DIR": "$SKILL_DIR", "SESSION": "$SESSION" } } } }
 JSON
 
 # By default the reviewer session asks before each edit/tool use — attach to approve, so
@@ -72,7 +72,7 @@ tmux send-keys -t "$SESSION" \
   "claude --mcp-config '$CFG' --dangerously-load-development-channels server:live-review --add-dir '$DIR' $AUTO_FLAGS" Enter
 
 # auto-confirm startup prompts (best-effort), wait for the channel to register
-for i in $(seq 1 12); do
+for _ in $(seq 1 12); do
   sleep 1.5
   P="$(tmux capture-pane -t "$SESSION" -p 2>/dev/null || true)"
   echo "$P" | grep -q "Channels (experimental)" && break

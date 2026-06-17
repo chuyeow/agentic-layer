@@ -14,6 +14,7 @@
       <div id="lr-head"><span id="lr-dot"></span><b>live-review</b><span class="lr-tag" id="lr-tag">connecting…</span>
         <button id="lr-toggle" title="collapse">▾</button></div>
       <div class="lr-body" id="lr-list"><div class="lr-empty">No comments yet. Select text, or hover a block and click ＋.</div></div>
+      <div id="lr-watch" hidden></div>
     </div>
     <div id="lr-composer">
       <div id="lr-anchor"></div>
@@ -31,6 +32,8 @@
   fetch("/_lr/whoami").then(r=>r.json()).then(j=>{
     $("#lr-tag").textContent = j.target || "live";
     $("#lr-dot").classList.add("lr-up");
+    if (j.session){ const w=$("#lr-watch"); w.hidden=false;
+      w.innerHTML = `▶ watch Claude work · <code>tmux attach -t ${esc(j.session)}</code>`; }
   }).catch(()=> $("#lr-tag").textContent = "offline");
 
   // ---- content-hash anchors (re-link comments across edits) ----
@@ -112,7 +115,7 @@
     const text = $("#lr-text").value.trim(); if(!text) return;
     const payload = { anchor: activeAnchor, quote: activeQuote, text, section_title: fmtWhere(activeAnchor), at: new Date().toISOString() };
     try { await fetch("/_lr/comment",{ method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(payload) });
-      toast("Comment sent → Claude"); closeComposer(); setTimeout(load, 250);
+      toast("Sent — Claude is on it…"); closeComposer(); load(); setTimeout(load, 600);
     } catch { toast("Failed to send"); }
   }
   function toast(m){ const t=$("#lr-toast"); t.textContent=m; t.classList.add("lr-show"); setTimeout(()=>t.classList.remove("lr-show"), 1800); }
@@ -135,16 +138,23 @@
   }
   async function load(){
     let list=[]; try { list = await (await fetch("/_lr/comments")).json(); } catch {}
-    document.querySelectorAll(".lr-btn.lr-has").forEach(b=>{ b.classList.remove("lr-has","lr-btn-resolved"); b.textContent="＋"; });
+    document.querySelectorAll(".lr-btn.lr-has").forEach(b=>{ b.classList.remove("lr-has","lr-btn-resolved","lr-btn-working"); b.textContent="＋"; });
+    const isPending = c => !c.reply && !c.resolved;     // submitted, Claude hasn't responded yet
     list.forEach(c=>{ const el=findAnchorEl(c); const b=el&&el.querySelector(":scope > .lr-btn");
-      if(b){ b.classList.add("lr-has"); b.textContent = c.resolved ? "✓" : "💬"; if(c.resolved) b.classList.add("lr-btn-resolved"); }});
+      if(b){ b.classList.add("lr-has"); const p=isPending(c);
+        b.textContent = c.resolved ? "✓" : (p ? "…" : "💬");
+        b.classList.toggle("lr-btn-resolved", !!c.resolved);
+        b.classList.toggle("lr-btn-working", p); }});
+    const working = list.filter(isPending).length;
+    $("#lr-dot").classList.toggle("lr-busy", working>0);
     const box=$("#lr-list");
     if(!list.length){ box.innerHTML = `<div class="lr-empty">No comments yet. Select text, or hover a block and click ＋.</div>`; return; }
     box.innerHTML = [...list].reverse().map(c=>{
       const moved = !findAnchorEl(c);
       const label = esc(c.section_title || c.anchor || "");
+      const pending = isPending(c);
       return `
-      <div class="lr-item${c.resolved?' lr-resolved':''}">
+      <div class="lr-item${c.resolved?' lr-resolved':''}${pending?' lr-working':''}">
         <div class="lr-where" data-cid="${esc(c.id)}">
           <span class="lr-goto">${c.resolved?'✓ ':'▸ '}${label}</span>
           <span class="lr-when">${moved?'<span class="lr-moved">⚠ moved</span> ':''}${timeAgo(c.at)}</span>
@@ -152,6 +162,7 @@
         ${c.quote?`<div class="lr-quote">“${esc(c.quote)}”</div>`:""}
         <div class="lr-txt">${esc(c.text)}</div>
         ${c.reply?`<div class="lr-reply"><b>Claude${c.resolved?' · resolved':''}</b> ${esc(c.reply)}</div>`:""}
+        ${pending?`<div class="lr-pending"><span class="lr-spin"></span>Claude is working on this…</div>`:""}
       </div>`;
     }).join("");
     box.querySelectorAll("[data-cid]").forEach(elr=>elr.onclick=()=>{
