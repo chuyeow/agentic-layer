@@ -14,7 +14,7 @@ set -euo pipefail
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # stable session name + port per target file (re-running the same file reuses them)
-sid()   { echo "lr-$(basename "${1%.*}" | tr -c 'a-zA-Z0-9' '-' | cut -c1-24)"; }
+sid()   { echo "lr-$(basename "${1%.*}" | tr -c 'a-zA-Z0-9' '-' | sed -E 's/-+/-/g' | cut -c1-24 | sed -E 's/-+$//')"; }
 sport() { echo $(( 4300 + $(echo -n "$1" | cksum | cut -d' ' -f1) % 200 )); }
 abspath() { echo "$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"; }
 

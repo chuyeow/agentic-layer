@@ -65,7 +65,8 @@
 #lr-dot.lr-busy { background:var(--lr-accent); box-shadow:0 0 0 3px #c8541f22; animation:lr-pulse 1.1s ease-in-out infinite; }
 #lr-watch { padding:8px 12px; border-top:1px solid var(--lr-line); font:9.5px/1.4 "Berkeley Mono",ui-monospace,monospace;
   letter-spacing:.04em; color:var(--lr-mute); }
-#lr-watch code { color:var(--lr-ink); background:#0000000a; padding:1px 4px; border-radius:3px; user-select:all; }
+#lr-watch code { color:var(--lr-ink); background:#0000000a; padding:1px 5px; border-radius:3px; user-select:all; cursor:pointer; }
+#lr-watch code:hover { background:#c8541f1a; color:var(--lr-accent); }
 
 /* composer */
 #lr-composer {

@@ -33,7 +33,12 @@
     $("#lr-tag").textContent = j.target || "live";
     $("#lr-dot").classList.add("lr-up");
     if (j.session){ const w=$("#lr-watch"); w.hidden=false;
-      w.innerHTML = `▶ watch Claude work · <code>tmux attach -t ${esc(j.session)}</code>`; }
+      const cmd = `tmux attach -t ${j.session}`;
+      w.innerHTML = `▶ watch Claude work · <code id="lr-watchcmd" title="click to copy">${esc(cmd)}</code>`;
+      $("#lr-watchcmd").onclick = async () => {
+        try { await navigator.clipboard.writeText(cmd); toast("Command copied"); }
+        catch { const r=document.createRange(); r.selectNodeContents($("#lr-watchcmd")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }
+      }; }
   }).catch(()=> $("#lr-tag").textContent = "offline");
 
   // ---- content-hash anchors (re-link comments across edits) ----
