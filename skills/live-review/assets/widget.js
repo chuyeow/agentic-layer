@@ -47,7 +47,7 @@
   const fmtWhere = a => { const el = document.querySelector(`[data-lr="${a}"]`); return el ? (labelFor(el)||a) : a; };
   function anchorFor(el){ if(!el.dataset.lr) el.dataset.lr = hash(labelFor(el) || el.tagName+el.className); return el.dataset.lr; }
 
-  const SEL = "h1,h2,h3,h4,h5,p,li,blockquote";
+  const SEL = "h1,h2,h3,h4,h5,p,li,blockquote,.milestone-title,.dim-name,.scope-line,.section-label";
   function wire(){
     document.querySelectorAll(SEL).forEach(el=>{
       if (el.closest("#lr-root")) return;            // never our own UI
@@ -62,7 +62,7 @@
   function resolveBlock(node){
     let el = node?.nodeType===1 ? node : node?.parentElement; if(!el) return null;
     if (el.closest("#lr-root")) return null;
-    let b = el.closest(".lr-on") || el.closest("h1,h2,h3,h4,h5,p,li,blockquote,td,th");
+    let b = el.closest(".lr-on") || el.closest("h1,h2,h3,h4,h5,p,li,blockquote,td,th,.milestone-title,.dim-name,.scope-line,.section-label");
     if (b && !b.classList.contains("lr-on")){ b.classList.add("lr-on"); anchorFor(b); }
     return b;
   }
