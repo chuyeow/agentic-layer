@@ -35,7 +35,7 @@ The target: **narrow enough to audit, broad enough to let the executor choose th
 
 ### Shape to aim for
 
-> `<desired end state>` verified by `<specific evidence>` while preserving `<constraints>`. Use `<allowed inputs, tools, boundaries>`. Between iterations, `<how to decide the next best action>`. Stop and report if `<blocked condition>`.
+> `<desired end state>` verified by `<specific evidence>` while preserving `<constraints>`. Use `<allowed inputs, tools, or boundaries>`. Between iterations, `<how the executor should choose the next best action>`. If blocked or no valid paths remain, `<what the executor should report and what would unlock progress>`.
 
 Not every goal needs all six spelled out at full length — a small task may fold constraints and boundaries into one clause. But every one should be *answerable*. If you can't say what proves it's done, that's the gap to fix first.
 
@@ -72,8 +72,6 @@ Use this structure:
 If the goal passes clean, collapse to: `**Goal is well-formed** — <one-line why>, proceeding.`
 
 ## Examples
-
-These are the examples from the OpenAI article, verbatim.
 
 **Weak input:** "Reduce p95 latency below 120 ms without regressing correctness tests"
 
