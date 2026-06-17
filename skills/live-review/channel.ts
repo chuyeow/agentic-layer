@@ -134,8 +134,17 @@ const server = Bun.serve({
       (c.messages ??= []).push({ from: "you", text, at: new Date().toISOString() });
       c.resolved = false;  // a follow-up reopens the thread
       await persist();
+      // give Claude the full thread context — a bare "A" is meaningless without it
+      const lastClaude = [...(c.messages || [])].reverse().find(m => m.from === "claude");
+      const ctx =
+        `Reviewer follow-up on comment ${c.id} — section "${c.section_title}".\n` +
+        (c.quote ? `Quoted passage: "${c.quote}"\n` : "") +
+        `Original comment: "${c.text}"\n` +
+        (lastClaude ? `Your last reply: "${lastClaude.text}"\n` : "") +
+        `Reviewer now says: "${text}"\n` +
+        `Respond via the reply tool with comment_id ${c.id}.`;
       await mcp.notification({ method: "notifications/claude/channel",
-        params: { content: `Follow-up from the reviewer:\n${text}`, meta: { comment_id: c.id, section: c.section_title, anchor: c.anchor, kind: "followup" } } });
+        params: { content: ctx, meta: { comment_id: c.id, section: c.section_title, anchor: c.anchor, kind: "followup" } } });
       return Response.json({ ok: true });
     }
 

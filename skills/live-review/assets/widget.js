@@ -189,7 +189,7 @@
   async function sendReply(cid){
     const inp = document.querySelector(`.lr-replyin[data-cid="${cid}"]`); if(!inp) return;
     const text = inp.value.trim(); if(!text) return;
-    inp.value = "";
+    inp.value = ""; inp.blur();   // blur so the focus-guard doesn't skip the rebuild that shows your reply
     try { await fetch("/_lr/reply",{ method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ comment_id: cid, text }) });
       toast("Reply sent — Claude is on it…"); load(); setTimeout(load, 600);
     } catch { toast("Failed to send"); }
