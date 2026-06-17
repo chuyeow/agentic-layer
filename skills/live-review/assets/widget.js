@@ -144,38 +144,55 @@
   async function load(){
     let list=[]; try { list = await (await fetch("/_lr/comments")).json(); } catch {}
     document.querySelectorAll(".lr-btn.lr-has").forEach(b=>{ b.classList.remove("lr-has","lr-btn-resolved","lr-btn-working"); b.textContent="＋"; });
-    const isPending = c => !c.reply && !c.resolved;     // submitted, Claude hasn't responded yet
+    const lastFrom = c => (c.messages&&c.messages.length) ? c.messages[c.messages.length-1].from : "you";
+    const isPending = c => !c.resolved && lastFrom(c)==="you";   // thread is waiting on Claude
     list.forEach(c=>{ const el=findAnchorEl(c); const b=el&&el.querySelector(":scope > .lr-btn");
       if(b){ b.classList.add("lr-has"); const p=isPending(c);
         b.textContent = c.resolved ? "✓" : (p ? "…" : "💬");
         b.classList.toggle("lr-btn-resolved", !!c.resolved);
         b.classList.toggle("lr-btn-working", p); }});
-    const working = list.filter(isPending).length;
-    $("#lr-dot").classList.toggle("lr-busy", working>0);
+    $("#lr-dot").classList.toggle("lr-busy", list.some(isPending));
+    // don't rebuild the list while a reply box is focused — it'd wipe what you're typing
+    if (document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("lr-replyin")) return;
     const box=$("#lr-list");
     if(!list.length){ box.innerHTML = `<div class="lr-empty">No comments yet. Select text, or hover a block and click ＋.</div>`; return; }
     box.innerHTML = [...list].reverse().map(c=>{
       const moved = !findAnchorEl(c);
       const label = esc(c.section_title || c.anchor || "");
       const pending = isPending(c);
+      const thread = [{from:"you",text:c.text,at:c.at}, ...(c.messages||[])]
+        .map(m=>`<div class="lr-msg lr-${m.from==='claude'?'claude':'you'}"><b>${m.from==='claude'?'Claude':'you'}</b>${esc(m.text)}</div>`).join("");
       return `
       <div class="lr-item${c.resolved?' lr-resolved':''}${pending?' lr-working':''}">
-        <div class="lr-where" data-cid="${esc(c.id)}">
+        <div class="lr-where lr-jump" data-cid="${esc(c.id)}">
           <span class="lr-goto">${c.resolved?'✓ ':'▸ '}${label}</span>
           <span class="lr-when">${moved?'<span class="lr-moved">⚠ moved</span> ':''}${timeAgo(c.at)}</span>
         </div>
         ${c.quote?`<div class="lr-quote">“${esc(c.quote)}”</div>`:""}
-        <div class="lr-txt">${esc(c.text)}</div>
-        ${c.reply?`<div class="lr-reply"><b>Claude${c.resolved?' · resolved':''}</b> ${esc(c.reply)}</div>`:""}
+        <div class="lr-thread">${thread}</div>
         ${pending?`<div class="lr-pending"><span class="lr-spin"></span>Claude is working on this…</div>`:""}
+        <div class="lr-replyrow">
+          <input class="lr-replyin" data-cid="${esc(c.id)}" placeholder="${c.resolved?'Reopen with a reply…':'Reply…'}">
+          <button class="lr-replybtn" data-cid="${esc(c.id)}" title="Send reply">↩</button>
+        </div>
       </div>`;
     }).join("");
-    box.querySelectorAll("[data-cid]").forEach(elr=>elr.onclick=()=>{
+    box.querySelectorAll(".lr-jump").forEach(elr=>elr.onclick=()=>{
       const c=list.find(x=>x.id===elr.dataset.cid); if(!c) return;
       const t=findAnchorEl(c); if(!t){ toast("anchor no longer in the page"); return; }
       t.scrollIntoView({behavior:"smooth",block:"center"}); const o=t.style.outline;
       t.style.outline="2px solid var(--lr-accent)"; setTimeout(()=>t.style.outline=o,1200);
     });
+    box.querySelectorAll(".lr-replybtn").forEach(b=> b.onclick=()=>sendReply(b.dataset.cid));
+    box.querySelectorAll(".lr-replyin").forEach(inp=> inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); sendReply(inp.dataset.cid); }}));
+  }
+  async function sendReply(cid){
+    const inp = document.querySelector(`.lr-replyin[data-cid="${cid}"]`); if(!inp) return;
+    const text = inp.value.trim(); if(!text) return;
+    inp.value = "";
+    try { await fetch("/_lr/reply",{ method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify({ comment_id: cid, text }) });
+      toast("Reply sent — Claude is on it…"); load(); setTimeout(load, 600);
+    } catch { toast("Failed to send"); }
   }
 
   $("#lr-toggle").onclick = () => $("#lr-panel").classList.toggle("lr-min");

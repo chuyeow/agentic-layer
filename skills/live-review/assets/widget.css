@@ -48,8 +48,21 @@
 .lr-reply { margin:8px 0 0; padding:7px 9px; background:#e6f3ee; border-radius:7px; font-size:12.5px; }
 .lr-reply b { color:var(--lr-accent2); font:10px/1 "Berkeley Mono",ui-monospace,monospace; text-transform:uppercase; letter-spacing:.05em; margin-right:6px; }
 .lr-empty { padding:16px 12px; color:var(--lr-mute); font-size:12.5px; text-align:center; }
-.lr-item.lr-resolved { opacity:.6; }
-.lr-item.lr-resolved .lr-txt { text-decoration:line-through; text-decoration-color:var(--lr-ink-4); }
+.lr-item.lr-resolved { opacity:.62; }
+/* thread of messages (opening comment + replies both ways) */
+.lr-thread { margin:6px 0 0; display:flex; flex-direction:column; gap:5px; }
+.lr-msg { padding:6px 9px; border-radius:7px; font-size:12.5px; line-height:1.5; white-space:pre-wrap; }
+.lr-msg b { display:block; font:9px/1 "Berkeley Mono",ui-monospace,monospace; text-transform:uppercase; letter-spacing:.06em; margin-bottom:3px; }
+.lr-msg.lr-you { background:#fff; border:1px solid #ece3c9; }
+.lr-msg.lr-you b { color:var(--lr-mute); }
+.lr-msg.lr-claude { background:#e6f3ee; }
+.lr-msg.lr-claude b { color:var(--lr-accent2); }
+.lr-replyrow { display:flex; gap:6px; margin-top:7px; }
+.lr-replyin { flex:1 1 auto; min-width:0; border:1px solid var(--lr-line); border-radius:6px; padding:5px 8px;
+  font:12px/1.4 ui-sans-serif,system-ui,sans-serif; background:#fff; color:var(--lr-ink); }
+.lr-replyin:focus { outline:none; border-color:var(--lr-accent2); }
+.lr-replybtn { flex:none; background:var(--lr-accent2); color:#fff; border:none; border-radius:6px; padding:5px 11px; cursor:pointer; font-size:13px; }
+.lr-replybtn:hover { filter:brightness(1.08); }
 .lr-where .lr-moved { color:var(--lr-accent); }
 .lr-btn.lr-btn-resolved { background:#fff; color:var(--lr-accent2); border-color:var(--lr-accent2); }
 

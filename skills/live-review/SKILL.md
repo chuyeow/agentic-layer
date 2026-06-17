@@ -79,12 +79,19 @@ Comments persist in the skill's own `.run/` dir (keyed by a hash of the target p
 stopping and restarting keeps the panel — and nothing is ever written into the directory
 of the file under review.
 
+## Threaded comments
+
+Each comment is a thread. Claude's reply appears under it; the reviewer can type a
+follow-up in the per-comment reply box (posts to `/_lr/reply`, reopens the thread, and
+pushes a `<channel ... kind="followup">` event so Claude responds again). So a reply that
+asks a question is answerable in-page — keep going until it's settled, then resolved.
+
 ## Resolved comments
 
 The reviewer's `reply` tool takes an optional `resolved` flag. When Claude has fully
 addressed a comment (made the edit or answered the question), it replies with
-`resolved: true`; the widget then greys + strikes that comment and flips its in-page
-marker to ✓. Open comments stay highlighted so the loop is visually closed.
+`resolved: true`; the widget then greys that comment and flips its in-page marker to ✓.
+Open threads stay highlighted so the loop is visually closed.
 
 If the reviewer rewords the exact block a comment was anchored to, the widget re-finds it
 by the quoted passage; if it can't, the comment shows `⚠ moved` rather than silently

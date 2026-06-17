@@ -35,10 +35,13 @@ const keyHash = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h
 const STORE = join(RUN_DIR, `${keyHash(TARGET)}.comments.json`);
 await mkdir(RUN_DIR, { recursive: true }).catch(() => {});
 
-type Comment = { id: string; anchor: string; section_title: string; quote: string; text: string; at: string; reply?: string; resolved?: boolean };
+type Msg = { from: "you" | "claude"; text: string; at: string };
+type Comment = { id: string; anchor: string; section_title: string; quote: string; text: string; at: string; messages?: Msg[]; resolved?: boolean; reply?: string };
 const comments: Comment[] = [];
 let seq = 1;
 try { const s = JSON.parse(await readFile(STORE, "utf8")); if (Array.isArray(s)) { comments.push(...s); seq = comments.length + 1; } } catch {}
+// each comment is a thread; migrate any legacy single `reply` into the message list
+for (const c of comments) { if (!c.messages) c.messages = []; if (c.reply) { c.messages.push({ from: "claude", text: c.reply, at: c.at }); delete c.reply; } }
 async function persist(){ try { await writeFile(STORE, JSON.stringify(comments, null, 2)); } catch {} }
 
 const sockets = new Set<any>();
@@ -59,7 +62,9 @@ const mcp = new Server(
       `note as the body (plus an optional quoted passage). For each: make the requested change by editing ` +
       `${TARGET} directly (the viewer hot-reloads), then call the \`reply\` tool with the comment_id to tell ` +
       `the reviewer what you changed, passing resolved:true once it is fully addressed. If a comment is a ` +
-      `question, answer via \`reply\` with resolved:true without editing.`,
+      `question, answer via \`reply\` without resolving — leave resolved off so the reviewer can respond. ` +
+      `The reviewer's follow-ups arrive as <channel ... kind="followup"> on the same comment_id; keep ` +
+      `replying via the reply tool with that comment_id until the thread is settled, then resolved:true.`,
   },
 );
 
@@ -79,7 +84,8 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
     const { comment_id, text, resolved } = req.params.arguments as { comment_id: string; text: string; resolved?: boolean };
     const c = comments.find(x => x.id === comment_id);
     if (!c) return { content: [{ type: "text", text: `no comment ${comment_id}` }], isError: true };
-    c.reply = text; if (resolved) c.resolved = true; await persist();
+    (c.messages ??= []).push({ from: "claude", text, at: new Date().toISOString() });
+    if (resolved) c.resolved = true; await persist();
     return { content: [{ type: "text", text: `reply posted under ${comment_id}${resolved ? " (resolved)" : ""}` }] };
   }
   throw new Error(`unknown tool: ${req.params.name}`);
@@ -112,6 +118,25 @@ const server = Bun.serve({
       await mcp.notification({ method: "notifications/claude/channel",
         params: { content: (c.quote ? `On the passage "${c.quote}":\n` : "") + c.text, meta: { comment_id: id, section: c.section_title, anchor: c.anchor } } });
       return Response.json({ ok: true, id });
+    }
+
+    // reviewer's follow-up on an existing comment thread → append + notify Claude
+    if (url.pathname === "/_lr/reply" && req.method === "POST") {
+      const site = req.headers.get("sec-fetch-site");
+      if (site && site !== "same-origin") return new Response("forbidden", { status: 403 });
+      const origin = req.headers.get("origin");
+      if (origin) { try { const h = new URL(origin).host; if (h !== `localhost:${PORT}` && h !== `127.0.0.1:${PORT}`) return new Response("forbidden", { status: 403 }); } catch { return new Response("forbidden", { status: 403 }); } }
+      const d = await req.json();
+      const c = comments.find(x => x.id === d.comment_id);
+      if (!c) return new Response("no such comment", { status: 404 });
+      const text = String(d.text ?? "").trim();
+      if (!text) return new Response("empty", { status: 400 });
+      (c.messages ??= []).push({ from: "you", text, at: new Date().toISOString() });
+      c.resolved = false;  // a follow-up reopens the thread
+      await persist();
+      await mcp.notification({ method: "notifications/claude/channel",
+        params: { content: `Follow-up from the reviewer:\n${text}`, meta: { comment_id: c.id, section: c.section_title, anchor: c.anchor, kind: "followup" } } });
+      return Response.json({ ok: true });
     }
 
     // the page under review, with the widget injected
