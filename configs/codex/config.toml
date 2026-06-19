@@ -1,5 +1,5 @@
 model = "gpt-5.5"
-model_reasoning_effort = "xhigh"
+model_reasoning_effort = "high"
 tool_output_token_limit = 25000
 
 sandbox_mode = "workspace-write"
@@ -7,12 +7,14 @@ approval_policy = "on-request"
 
 approvals_reviewer = "guardian_subagent"
 
+notify = ["/Users/chuyeow/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
+service_tier = "default"
+
 [sandbox_workspace_write]
+writable_roots = ["/Users/chuyeow/code/personal-agent-stack/.git", "/Users/chuyeow/code/personal-agent-stack/.git/worktrees"]
 network_access = true
-writable_roots = [
-  "/Users/chuyeow/code/personal-agent-stack/.git",
-  "/Users/chuyeow/code/personal-agent-stack/.git/worktrees",
-]
+exclude_tmpdir_env_var = false
+exclude_slash_tmp = false
 
 [features]
 apply_patch_freeform = true
@@ -20,6 +22,7 @@ web_search_request = true
 tui2 = true
 skills = true
 codex_git_commit = true
+js_repl = false
 
 [notice.model_migrations]
 "gpt-5.2" = "gpt-5.2-codex"
@@ -42,3 +45,92 @@ approval_mode = "approve"
 
 [mcp_servers.chrome-devtools.tools.close_page]
 approval_mode = "approve"
+
+[mcp_servers.node_repl]
+args = []
+command = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node_repl"
+startup_timeout_sec = 120
+
+[mcp_servers.node_repl.env]
+NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
+NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
+NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
+NODE_REPL_TRUSTED_CODE_PATHS = "/Users/chuyeow/.codex"
+CODEX_HOME = "/Users/chuyeow/.codex"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "843b151e6459c4593a4a9c5bf817cc51e28fc29afe6b75990deceb2f914995ac"
+BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
+NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
+NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
+BROWSER_USE_CODEX_APP_VERSION = "26.616.31447"
+CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+
+[projects."/Users/chuyeow/code/vacations"]
+trust_level = "trusted"
+
+[projects."/Users/chuyeow/code/wego/wego-agent"]
+trust_level = "trusted"
+
+[projects."/Users/chuyeow/code/quiet-room"]
+trust_level = "trusted"
+
+[projects."/Users/chuyeow/code/automate-everything"]
+trust_level = "trusted"
+
+[projects."/Users/chuyeow/code/learning-japanese"]
+trust_level = "trusted"
+
+[projects."/Users/chuyeow/code/agentic-layer"]
+trust_level = "trusted"
+
+[marketplaces.openai-primary-runtime]
+last_updated = "2026-06-15T01:14:17Z"
+source_type = "local"
+source = "/Users/chuyeow/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
+
+[marketplaces.openai-bundled]
+last_updated = "2026-06-19T01:20:44Z"
+source_type = "local"
+source = "/Users/chuyeow/.codex/.tmp/bundled-marketplaces/openai-bundled"
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."pdf@openai-primary-runtime"]
+enabled = true
+
+[plugins."spreadsheets@openai-primary-runtime"]
+enabled = true
+
+[plugins."presentations@openai-primary-runtime"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."chrome@openai-bundled"]
+enabled = true
+
+[desktop]
+appearanceLightCodeThemeId = "proof"
+keepRemoteControlAwakeWhilePluggedIn = true
+
+[desktop.appearanceLightChromeTheme]
+accent = "#3d755d"
+contrast = 45
+ink = "#2f312d"
+opaqueWindows = false
+surface = "#f5f3ed"
+
+[desktop.appearanceLightChromeTheme.fonts]
+
+[desktop.appearanceLightChromeTheme.semanticColors]
+diffAdded = "#3d755d"
+diffRemoved = "#ba2623"
+skill = "#5f6ac2"
+
+[tui.model_availability_nux]
+"gpt-5.5" = 1
