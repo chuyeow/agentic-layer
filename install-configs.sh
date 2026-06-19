@@ -7,6 +7,7 @@ Usage: ./install-configs.sh [--force] [--dry-run]
 
 Symlink repo `configs/codex/**` into `~/.codex/**` (or `$CODEX_HOME/**`).
 Copy repo `skills/**` into `~/.codex/skills/**` (or `$CODEX_HOME/skills/**`).
+Symlink repo `skills/<name>/` dirs into `~/.claude/skills/<name>/`.
 Copy repo `commands/*.md` into `~/.codex/skills/<name>/SKILL.md` (frontmatter filtered for Codex).
 Symlink repo `commands/*.md` into `~/.claude/commands/*.md`.
 Also symlink repo `AGENTS.md` into `~/.claude/CLAUDE.md`.
@@ -44,7 +45,8 @@ mkdirp() {
 
 move_aside() {
   local target="$1"
-  local backup="${target}.bak.$(date +%s)"
+  local backup
+  backup="${target}.bak.$(date +%s)"
   [[ $dry_run -eq 1 ]] && echo "mv $target $backup" || mv "$target" "$backup"
 }
 
@@ -175,6 +177,19 @@ if [[ -d "$src_skills_root" ]]; then
     rel="${src#"$src_skills_root"/}"
     dst="$dst_root/skills/$rel"
     if ! copy_file "$src" "$dst"; then
+      errors=1
+    fi
+  done
+fi
+
+if [[ -d "$src_skills_root" ]]; then
+  claude_skills_root="$HOME/.claude/skills"
+  mkdirp "$claude_skills_root"
+  mapfile -t skill_dirs < <(find "$src_skills_root" -mindepth 1 -maxdepth 1 -type d -print | LC_ALL=C sort)
+  for src in "${skill_dirs[@]}"; do
+    skill_name="$(basename "$src")"
+    dst="$claude_skills_root/$skill_name"
+    if ! link_file "$src" "$dst"; then
       errors=1
     fi
   done
