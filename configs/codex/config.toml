@@ -8,13 +8,7 @@ approval_policy = "on-request"
 approvals_reviewer = "guardian_subagent"
 
 notify = ["/Users/chuyeow/.codex/computer-use/Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient", "turn-ended"]
-service_tier = "default"
-
-[sandbox_workspace_write]
-writable_roots = ["/Users/chuyeow/code/personal-agent-stack/.git", "/Users/chuyeow/code/personal-agent-stack/.git/worktrees"]
-network_access = true
-exclude_tmpdir_env_var = false
-exclude_slash_tmp = false
+service_tier = "priority"
 
 [features]
 apply_patch_freeform = true
@@ -57,12 +51,12 @@ NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_nod
 NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/chuyeow/.codex"
 CODEX_HOME = "/Users/chuyeow/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "843b151e6459c4593a4a9c5bf817cc51e28fc29afe6b75990deceb2f914995ac"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "59e7bb81812ddd5f102e1d580335166e552c91686b5726218a985b59b4f89ca1"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
 NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.616.31447"
+BROWSER_USE_CODEX_APP_VERSION = "26.623.42026"
 CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
 
 [projects."/Users/chuyeow/code/vacations"]
@@ -83,13 +77,19 @@ trust_level = "trusted"
 [projects."/Users/chuyeow/code/agentic-layer"]
 trust_level = "trusted"
 
+[projects."/Users/chuyeow/code/finances"]
+trust_level = "trusted"
+
+[projects."/Users/chuyeow/code/coffee-recipes"]
+trust_level = "trusted"
+
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-06-15T01:14:17Z"
+last_updated = "2026-06-24T05:14:47Z"
 source_type = "local"
 source = "/Users/chuyeow/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-06-19T01:20:44Z"
+last_updated = "2026-06-28T13:20:42Z"
 source_type = "local"
 source = "/Users/chuyeow/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
@@ -114,9 +114,13 @@ enabled = true
 [plugins."chrome@openai-bundled"]
 enabled = true
 
+[plugins."template-creator@openai-primary-runtime"]
+enabled = true
+
 [desktop]
 appearanceLightCodeThemeId = "proof"
 keepRemoteControlAwakeWhilePluggedIn = true
+followUpQueueMode = "queue"
 
 [desktop.appearanceLightChromeTheme]
 accent = "#3d755d"
