@@ -16,11 +16,18 @@ description: >
 
 <premise>
 As AI agents write more of the code, the scarce resource is no longer typing or even
-verification — it's the human's live understanding of the system. Without it they lose
-the ability to steer. This skill closes that gap on purpose: it produces artifacts whose
-only job is to move understanding from the agent's head into the user's, and it paces
-that understanding against the work (Litt's "speed regulator"). Source:
-geoffreylitt.com — "Understanding is the new bottleneck."
+verification. Litt's key distinction: humans understand for two reasons, and only one
+survives better agents. Understanding-to-**verify** (is this correct? does it match the
+spec? will it take down prod?) is a shrinking human job — agents ask those questions too,
+and keep getting better at them. Understanding-to-**participate** is the durable one: your
+live grasp of the system compounds loop over loop and is the foundation for having the
+*next* idea. Lose it and you can still approve diffs, but you can no longer steer or
+create. The cost of losing it has a name — **cognitive debt** (Margaret Storey, Simon
+Willison): like tech debt, you get away with it for a while, then you hit the point where
+you have no idea what's going on and can't participate anymore. This skill pays that debt
+down on purpose: it produces artifacts whose only job is to move understanding from the
+agent's head into the user's, and it paces that understanding against the work (Litt's
+"speed regulator"). Source: geoffreylitt.com — "Understanding is the new bottleneck."
 </premise>
 
 <two_modes>
