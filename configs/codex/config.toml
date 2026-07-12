@@ -1,4 +1,4 @@
-model = "gpt-5.5"
+model = "gpt-5.6-sol"
 model_reasoning_effort = "xhigh"
 tool_output_token_limit = 25000
 
@@ -50,22 +50,30 @@ approval_mode = "approve"
 
 [mcp_servers.node_repl]
 args = []
-command = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node_repl"
+command = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl"
 startup_timeout_sec = 120
 
 [mcp_servers.node_repl.env]
 NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS = "1000"
-NODE_REPL_NODE_MODULE_DIRS = "/Applications/Codex.app/Contents/Resources/cua_node/lib/node_modules"
-NODE_REPL_NODE_PATH = "/Applications/Codex.app/Contents/Resources/cua_node/bin/node"
+NODE_REPL_NODE_MODULE_DIRS = "/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules"
+NODE_REPL_NODE_PATH = "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
 NODE_REPL_TRUSTED_CODE_PATHS = "/Users/chuyeow/.codex"
 CODEX_HOME = "/Users/chuyeow/.codex"
-NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "60e4902788f207f88fd09344dfeafe07769488bdb2924bbb12b322c3b9d2b999"
+NODE_REPL_TRUSTED_BROWSER_CLIENT_SHA256S = "6d25aa7656feac858f3a3bdaea5bcbab0dbfd426c9de8e6931ce90c399ee8e4f,c8b7e809d7cf9e20a57123b2530d476ccec9a01a6230a7b2b924fea7d94d7f4a"
 BROWSER_USE_AVAILABLE_BACKENDS = "chrome,iab"
 NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER = "Control the in-app browser in conjunction with the Browser Plugin."
 NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME = "Control the Chrome browser in conjunction with the Chrome Plugin. Prefer this method of controlling Chrome over alternatives (such as Computer Use) unless the user explicitly mentions an alternative."
+NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE = "Control desktop apps on macOS through Computer Use."
 BROWSER_USE_CODEX_APP_BUILD_FLAVOR = "prod"
-BROWSER_USE_CODEX_APP_VERSION = "26.623.101652"
-CODEX_CLI_PATH = "/Applications/Codex.app/Contents/Resources/codex"
+BROWSER_USE_CODEX_APP_VERSION = "26.707.31428"
+SKY_CUA_SERVICE_PATH = "/Users/chuyeow/.codex/plugins/cache/openai-bundled/computer-use/1.0.1000366/Codex Computer Use.app"
+CODEX_CLI_PATH = "/Applications/ChatGPT.app/Contents/Resources/codex"
+
+[mcp_servers.computer-use]
+command = "./Codex Computer Use.app/Contents/SharedSupport/SkyComputerUseClient.app/Contents/MacOS/SkyComputerUseClient"
+args = ["mcp"]
+cwd = "."
+enabled = false
 
 [projects."/Users/chuyeow/code/vacations"]
 trust_level = "trusted"
@@ -91,19 +99,31 @@ trust_level = "trusted"
 [projects."/Users/chuyeow/code/coffee-recipes"]
 trust_level = "trusted"
 
+[projects."/Users/chuyeow/code/garden-wars"]
+trust_level = "trusted"
+
+[projects."/Users/chuyeow/code/wego/agentic-playbook"]
+trust_level = "trusted"
+
 [marketplaces.openai-primary-runtime]
-last_updated = "2026-07-01T07:15:49Z"
+last_updated = "2026-07-10T02:14:22Z"
 source_type = "local"
 source = "/Users/chuyeow/.cache/codex-runtimes/codex-primary-runtime/plugins/openai-primary-runtime"
 
 [marketplaces.openai-bundled]
-last_updated = "2026-07-03T10:30:20Z"
+last_updated = "2026-07-10T01:35:26Z"
 source_type = "local"
 source = "/Users/chuyeow/.codex/.tmp/bundled-marketplaces/openai-bundled"
 
+[marketplaces.last30days-skill]
+last_updated = "2026-07-11T09:01:34Z"
+last_revision = "91e606a369050753aeb1cc7daaae0ff55b0b79fd"
+source_type = "git"
+source = "https://github.com/mvanhorn/last30days-skill.git"
+
 [marketplaces.ponytail]
-last_updated = "2026-07-02T01:24:59Z"
-last_revision = "40e50d9e03242aa5dd53ac771950f9127362b25f"
+last_updated = "2026-07-10T03:01:14Z"
+last_revision = "14a0d79548d4de8fc2de95c1b94bb0de63a739d3"
 source_type = "git"
 source = "https://github.com/DietrichGebert/ponytail.git"
 
@@ -119,9 +139,6 @@ enabled = true
 [plugins."presentations@openai-primary-runtime"]
 enabled = true
 
-[plugins."browser@openai-bundled"]
-enabled = true
-
 [plugins."computer-use@openai-bundled"]
 enabled = true
 
@@ -134,13 +151,26 @@ enabled = true
 [plugins."template-creator@openai-primary-runtime"]
 enabled = true
 
+[plugins."last30days@last30days-skill"]
+enabled = true
+
 [plugins."ponytail@ponytail"]
+enabled = true
+
+[plugins."sites@openai-bundled"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
 enabled = true
 
 [desktop]
 appearanceLightCodeThemeId = "proof"
 keepRemoteControlAwakeWhilePluggedIn = true
 followUpQueueMode = "queue"
+dock-icon-preference = "codex-system"
 
 [desktop.appearanceLightChromeTheme]
 accent = "#3d755d"
@@ -157,7 +187,7 @@ diffRemoved = "#ba2623"
 skill = "#5f6ac2"
 
 [tui.model_availability_nux]
-"gpt-5.5" = 3
+"gpt-5.5" = 1
 
 [memories]
 generate_memories = true
@@ -165,3 +195,17 @@ use_memories = true
 
 [mcp_servers."context7"]
 url = "https://mcp.context7.com/sse"
+
+[hooks.state]
+
+[hooks.state."last30days@last30days-skill:hooks/hooks.json:session_start:0:0"]
+trusted_hash = "sha256:493659fe966eddb6bbadee5e4ea27400ffbb12da667cb548855522af9c4a7baa"
+
+[hooks.state."ponytail@ponytail:hooks/claude-codex-hooks.json:session_start:0:0"]
+trusted_hash = "sha256:10e0ac0497512b279dc2b073d0d559fb9fb252bc18b9c943d2f0a6d58152b1f4"
+
+[hooks.state."ponytail@ponytail:hooks/claude-codex-hooks.json:user_prompt_submit:0:0"]
+trusted_hash = "sha256:2a3c9015a1fe10f0809ffec8da3d67c326e27c38ebf720725099283b1e2085a8"
+
+[hooks.state."ponytail@ponytail:hooks/claude-codex-hooks.json:subagent_start:0:0"]
+trusted_hash = "sha256:4765354e31cc783c9cc7379f8beac7ac7ff68743c3cd7dad333d1f6a64e7a6f3"
