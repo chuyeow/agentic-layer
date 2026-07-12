@@ -1,5 +1,9 @@
 Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; min tokens.
 
+## My opinions
+
+- @OPINIONS.md — my curated opinions and principles. Read it when my stance matters — a judgment call, design/architecture/review decisions, anything "what would Chu Yeow decide".
+
 ## Agent protocol
 
 - Contact: Cheah Chu Yeow (@chuyeow, chuyeow@gmail.com)
