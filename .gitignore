@@ -6,3 +6,5 @@ __pycache__/
 # Generated verification artifacts
 outputs/
 .tmp/verification/
+
+.DS_Store
