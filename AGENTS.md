@@ -21,8 +21,9 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 
 ## Writing style
 
-- Prose: en-dashes (–) not em-dashes (—); my signature. Jira: em-dash → colon.
+- En-dashes (–), never em-dashes (—); my signature. Every character you emit anywhere – chat, HTML, Slack, diagram labels, docs. Grep the artifact for — before handing over. Jira: em-dash → colon. Plaintext targets (Bamboo, form fields): no bold, no markdown.
 - Copy: plain not flowery; concise not repetitive. Slides: terse — verbalized live, not read literally.
+- Reports carry the verdict, not the hunt. No discarded hypotheses, no "we first thought X", no round-count or self-assessment of the process, no explainers defending a choice nobody questioned. That belongs in chat, not the artifact.
 
 ## Build + test
 
@@ -30,6 +31,7 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 - TDD: test first; red/green/refactor; use the `tdd` skill.
 - CI red: `gh run list/view`, rerun, fix, push, repeat til green.
 - Keep it observable: logs, panes, tails, MCP/browser tools.
+- Never say a thing works from reading it. Run it, then paste the evidence handle – the command + output, the URL, the screenshot. Anything not executed gets labelled "inferred, not run" in the same sentence as the claim.
 
 ## Git
 
@@ -88,6 +90,7 @@ Do:
 
 - Type: skip Inter/Roboto/Arial/system fonts; pick a voice.
 - Theme: commit to a palette; bold accents > timid gradients.
+- HTML deliverable isn't done until screenshotted at 390px and ~1440px. Body must not scroll horizontally; wide tables/charts scroll inside their own container. Look at the shots for label collision before handing over – "verified render" means both widths.
   </frontend_aesthetics>
 
 ## Principle: Functional Core, Imperative Shell
