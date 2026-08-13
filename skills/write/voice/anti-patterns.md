@@ -116,6 +116,27 @@ The generator MUST NOT invent:
 
 If a number "feels right" but isn't in the spec — use a placeholder `<X%>` or `<owner>` and surface to user.
 
+## Hard-fail reasoning artifacts (the hunt, not the verdict)
+
+A finished artifact carries **what is true**, not the path taken to find it. The
+process belongs in chat. Hard-fail any of these in a report, doc, brief, or
+committed file:
+
+- **Discarded hypotheses**: "we first thought X, but", "our initial read was", "this turned out not to be"
+- **Narrated correction of your own earlier output**: "an earlier version of this said", "my estimate was wrong by $162K", "superseded" sections describing *your* prior draft
+- **Round-count or effort narration**: "after three passes", "on closer inspection", "digging further", "it took some reconciling"
+- **Self-assessment of the process**: "this was harder than expected", "the analysis proved tricky", "confidence is high after cross-checking"
+- **Explainers defending a choice nobody questioned**: a paragraph justifying why a file is named what it is, why a source was picked, or why an obvious approach was obvious
+
+Rewrite as the standing fact. `"I first derived Feb by subtraction and got -$107K, but the model says -$269K"` becomes `"February EBITDA -$269K."`
+
+**Not covered by this rule** – these stay:
+- **Provenance of a figure a reader may meet elsewhere.** "May EBITDA has been published as $144K, $185K and $178K; use $178K" is a reader service, not the hunt. So is naming which source wins.
+- **One-line evidence handles.** A single sentence proving a claim ("its Jan–Jul EBITDA sums to $1,220K, matching the pack's YTD line") is verification, not narration. Two paragraphs of it is narration.
+- **Someone else's disagreement or restatement.** External conflicts are facts about the world.
+
+The test: would the reader act differently if this sentence were deleted? If no, cut it.
+
 ## Soft-warn (score reduction, not hard-fail)
 
 - Three or more sentences of preamble before the ask
