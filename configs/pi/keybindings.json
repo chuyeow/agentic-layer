@@ -1,0 +1,8 @@
+{
+  "app.model.select": "ctrl+l",
+  "app.model.cycleForward": "ctrl+p",
+  "app.model.cycleBackward": "shift+ctrl+p",
+  "app.thinking.cycle": "shift+tab",
+  "app.tools.expand": "ctrl+o",
+  "app.message.copy": "ctrl+x"
+}
