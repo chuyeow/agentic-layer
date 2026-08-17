@@ -6,6 +6,7 @@ usage() {
 Usage: ./install-configs.sh [--force] [--dry-run]
 
 Symlink repo `configs/codex/**` into `~/.codex/**` (or `$CODEX_HOME/**`).
+Symlink repo `configs/pi/**` into `~/.pi/agent/**` (or `$PI_CODING_AGENT_DIR/**`).
 Copy repo `skills/**` into `~/.codex/skills/**` (or `$CODEX_HOME/skills/**`).
 Symlink repo `skills/<name>/` dirs into `~/.claude/skills/<name>/`.
 Copy repo `commands/*.md` into `~/.codex/skills/<name>/SKILL.md` (frontmatter filtered for Codex).
@@ -33,9 +34,16 @@ done
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 src_root="$repo_root/configs/codex"
 dst_root="${CODEX_HOME:-$HOME/.codex}"
+pi_src_root="$repo_root/configs/pi"
+pi_dst_root="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
 
 if [[ ! -d "$src_root" ]]; then
   echo "missing: $src_root" >&2
+  exit 1
+fi
+
+if [[ ! -d "$pi_src_root" ]]; then
+  echo "missing: $pi_src_root" >&2
   exit 1
 fi
 
@@ -165,6 +173,15 @@ errors=0
 for src in "${files[@]}"; do
   rel="${src#"$src_root"/}"
   dst="$dst_root/$rel"
+  if ! link_file "$src" "$dst"; then
+    errors=1
+  fi
+done
+
+mapfile -t pi_files < <(find "$pi_src_root" -type f ! -name '.gitkeep' -print | LC_ALL=C sort)
+for src in "${pi_files[@]}"; do
+  rel="${src#"$pi_src_root"/}"
+  dst="$pi_dst_root/$rel"
   if ! link_file "$src" "$dst"; then
     errors=1
   fi
