@@ -1,0 +1,28 @@
+{
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-sol",
+  "defaultThinkingLevel": "xhigh",
+  "steeringMode": "all",
+  "packages": [
+    "npm:pi-web-access",
+    "npm:pi-autoresearch",
+    {
+      "source": "npm:@plannotator/pi-extension",
+      "skills": []
+    },
+    "npm:@ryan_nookpi/pi-extension-codex-fast-mode",
+    "git:github.com/algal/pi-openai-server-compaction"
+  ],
+  "theme": "kanagawa",
+  "treeFilterMode": "default",
+  "enableInstallTelemetry": false,
+  "transport": "auto",
+  "hideThinkingBlock": true,
+  "followUpMode": "all",
+  "showCacheMissNotices": true,
+  "collapseChangelog": true,
+  "defaultProjectTrust": "ask",
+  "tuiMode": "fullscreen",
+  "fullscreenExitOutput": "transcript",
+  "fullscreenScrollbar": "auto"
+}
