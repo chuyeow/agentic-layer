@@ -47,7 +47,7 @@
   const fmtWhere = a => { const el = document.querySelector(`[data-lr="${a}"]`); return el ? (labelFor(el)||a) : a; };
   function anchorFor(el){ if(!el.dataset.lr) el.dataset.lr = hash(labelFor(el) || el.tagName+el.className); return el.dataset.lr; }
 
-  const SEL = "h1,h2,h3,h4,h5,p,li,blockquote,.milestone-title,.dim-name,.scope-line,.section-label";
+  const SEL = "h1,h2,h3,h4,h5,p,li,dt,dd,figcaption,blockquote,q,.milestone-title,.dim-name,.scope-line,.section-label";
   function wire(){
     document.querySelectorAll(SEL).forEach(el=>{
       if (el.closest("#lr-root")) return;            // never our own UI
