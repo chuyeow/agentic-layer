@@ -122,3 +122,9 @@ How to apply:
 
 Using gpt-5.5 inside workflows and subagents (the model parameter only takes Claude models, so use a wrapper):
 - Spawn a thin Claude wrapper agent with `model: 'sonnet', effort: 'low'` whose prompt instructs it to write a self-contained codex prompt, run `codex exec` via Bash, and return
+
+## Codex pstack configuration
+
+When using pstack from Codex, read `~/.codex/pstack-models.md` and apply its role and model overrides ahead of the defaults above and the installed pstack model matrix. These overrides apply only to Codex. Preserve the shared `~/.codex/AGENTS.md` symlink and keep the model configuration in its separate sheet; do not replace the shared baseline or inline the sheet here.
+
+@~/.claude/pstack-models.md
