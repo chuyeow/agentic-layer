@@ -15,7 +15,7 @@ Concrete markers of Chu Yeow's voice (from `~/.claude/CLAUDE.md` "Writing style"
 - **Concrete > abstract**: cites the dashboard, the PR number, the % delta, the channel, the date – not vague "issues" or "things".
 - **Lowercase first word** in casual peer/eng registers. Sentence case for leadership and long-form.
 - **One-liners preferred** when the message is small. Bullet lists only when ≥3 truly distinct items and prose would obscure structure.
-- **No softeners**: no "just" (stacked), "really" (as filler), "basically", "actually", "simply", "I think we might want to", "perhaps we could".
+- **Softeners one at a time**: `just`, `really`, `actually`, `basically`, `simply` are voice-true used singly (see the "Not blocked" carve-outs in `anti-patterns.md`); cut them when stacked or repeated. Cut chained hedges: "I think we might want to", "perhaps we could".
 - **En-dashes (–), never em-dashes (—)** – Chu Yeow's signature. Sparingly: one clarifier per short message max. Two-or-more en-dashes in a short message is the slop smell. (Jira is the exception: separator is a colon, not a dash.)
 - **Backtick technical terms** in dev contexts: `payments_and_success_rates.csv`, `FBT-1234`, `wego/wego-fares`, repo paths.
 - **Surface-native formatting** (see below) – never fight the medium.
@@ -33,7 +33,7 @@ Chu Yeow's final drafts are shorter than the "already tight" draft. His edits re
 
 - **Trust the link — don't restate what it says.** Pointing to a guide/doc/note = "please use it", not a paraphrase of its contents. Re-explaining a linked source was the single biggest cut. (A draft that linked Ryan's review guide *and* restated its "evidence over vibes / one growth area / forward-looking" bar → he kept only "genuinely good imo, please use it".)
 - **No nag, no moralizing counter-clause.** "do these properly" — not "do these properly, *not to push them to the last night*". State the positive purpose; drop the implied scold.
-- **No manufactured urgency or status close.** He cut "I'd like us leads done first" and "please nudge your teams too". Don't add pressure or a competitive frame the intent didn't ask for — let the ask stand and stop. **Carve-out (2026-07-08):** this targets *fake* urgency/status only, NOT genuine warmth. A sincere, specific close is voice-true and must NOT be stripped — see "Recognition & warmth" below. (He replaced a flat "Wishing him the best" with a specific generous gesture; the earlier version of this rule would have wrongly cut it.)
+- **No manufactured urgency or status close.** He cut "I'd like us leads done first" and "please nudge your teams too". Don't add pressure or a competitive frame the intent didn't ask for — let the ask stand and stop. **Carve-out (2026-07-08):** this targets *fake* urgency/status only, NOT genuine warmth. A sincere, specific close is voice-true and must NOT be stripped — see "Recognition & warmth" below. (He replaced a flat "Wishing him the best" with a specific generous gesture.)
 - **Cut elaboration to the bare step.** A 3-step ask with a clause explaining why step 3 matters → two bare steps. If the reader can infer it, cut it.
 - **Plain over bold for routine tokens.** He unbolded `*Wed 15 Jul*` → plain. Bold a genuine key term, never a date/name/deadline by default.
 

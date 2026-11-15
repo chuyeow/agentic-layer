@@ -61,11 +61,3 @@ Provide a structured summary in this format:
 ### Remote Configuration
 [List configured remotes]
 ```
-
-## Key Principles
-
-- Be concise but comprehensive
-- Highlight important status indicators (conflicts, uncommitted changes, etc.)
-- Use clear, actionable language
-- Focus on information relevant to current development state
-- Include file counts and change statistics when relevant

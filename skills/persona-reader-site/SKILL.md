@@ -76,7 +76,7 @@ Output: `<out_dir>/index.html` (single file, data embedded, no server needed).
 
 **Tweet quality knobs**:
 - `exclude: ["replies","reposts"]` — drop the account's replies and/or reposts (filtered at *build* time from cached `social`/`reply` flags, so toggling just needs a rebuild, no re-scrape). Useful for noisy brand/active accounts. Note: reposts of *other* people are already excluded by handle-matching; this mainly catches replies and self-quote noise.
-- `backfill` auto-retries rate-limited misses across `backfill_passes` passes and records genuine no-text tweets (media/quote) in `nofull.json` so they aren't chased forever or flagged as "truncated". No more manual re-runs.
+- `backfill` auto-retries rate-limited misses across `backfill_passes` passes and records genuine no-text tweets (media/quote) in `nofull.json` so they aren't chased forever or flagged as "truncated".
 
 ## Prerequisites
 
@@ -123,7 +123,7 @@ python3 scripts/reader.py build   --config presets/karpathy.json
 ```
 
 The `x` and `backfill` steps are long (minutes) and hit X rate limits — run them
-**in the background**. `backfill` now auto-retries misses across `backfill_passes`
+**in the background**. `backfill` auto-retries misses across `backfill_passes`
 passes (resuming from the checkpoint) and stops once it makes no progress, so a single
 invocation is enough. Then `build`.
 

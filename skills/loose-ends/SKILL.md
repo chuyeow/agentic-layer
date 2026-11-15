@@ -10,7 +10,7 @@ behind: uncommitted work, half-merged branches, scratch files accidentally commi
 dev servers still running, an ssh-agent pointed at the wrong key, knowledge that should
 have been written down.
 
-This is NOT [[session-tracker]] (which saves *unfinished* work for `--resume`) nor a
+This is NOT [[claude-code-session-tracker]] (which saves *unfinished* work for `--resume`) nor a
 handoff doc (which narrates the session). This is the janitorial pass that leaves the
 machine and the repos in a clean state.
 

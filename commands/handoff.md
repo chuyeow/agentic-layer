@@ -71,10 +71,3 @@ When this command is executed, you will:
 ---
 *Generated on [timestamp] - Continue work with this context*
 ```
-
-## Key Principles
-- Be comprehensive but concise
-- Include specific file paths and line numbers
-- Focus on actionable information for continuation
-- Preserve important context that might be lost between sessions
-- Ensure new session can pick up seamlessly without confusion

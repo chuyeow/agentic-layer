@@ -20,7 +20,7 @@ Hard-fails = rewrite the span before presenting the draft. Soft-warns = fix if c
 
 ## Voice-true patterns to actively reproduce (positives, not anti-patterns)
 
-These appear in the real corpus as recurring signatures. The generator should *include* these where natural:
+These appear in the real corpus as recurring signatures. *Include* these where natural:
 
 - **Question-stacking**: 2-4 sequential questions to propose / probe instead of "we should do X"
 - **Mid-sentence parenthetical with concrete detail**: "(error msg: '...')", "(fyi we are removing some CS leads too)"
@@ -97,7 +97,7 @@ Default: cut the message at the ask. If the spec specifies broadcast register AN
 
 - Markdown headers (`#`, `##`) — Slack doesn't render
 - `**double asterisk**` for bold — Slack uses single `*asterisk*`
-- **Any em-dash `—` (U+2014). Hard-fail at any count.** Chu Yeow does not use em-dash, period (per user 2026-05-12 — he doesn't even know how to type one). Use en-dash `–` (U+2013) instead. The generator may have habitual em-dash output; replace every `—` with `–` before submitting.
+- **Any em-dash `—` (U+2014). Hard-fail at any count.** Chu Yeow does not use em-dash, period (per user 2026-05-12 — he doesn't even know how to type one). Use en-dash `–` (U+2013) instead. Replace every `—` with `–` before presenting.
 - 2+ en-dashes (`–`) in a message ≤ 50 words.
 - Bulleted list with 1 or 2 items (use prose)
 - Numbered list when no order is implied
@@ -106,15 +106,15 @@ Default: cut the message at the ask. If the spec specifies broadcast register AN
 
 ## Hard-fail fabrication
 
-The generator MUST NOT invent:
-- Specific numbers / percentages / dates not in `spec.required_facts`
+Never invent:
+- Specific numbers / percentages / dates not given to you
 - Slack channel names not given by user
 - Jira/Linear IDs (`FBT-1234`, `AI-456`)
 - PR numbers or repo paths
 - Person names beyond what the user mentioned
 - Dollar amounts, financial figures, cost numbers — never invent. If the user's intent didn't supply the number, use a placeholder `<$X>`.
 
-If a number "feels right" but isn't in the spec — use a placeholder `<X%>` or `<owner>` and surface to user.
+If a number "feels right" but wasn't given to you – use a placeholder `<X%>` or `<owner>` and surface to user.
 
 ## Hard-fail reasoning artifacts (the hunt, not the verdict)
 
@@ -147,8 +147,8 @@ The test: would the reader act differently if this sentence were deleted? If no,
 - "we should" with no "by when" or "owner"
 - All-caps for emphasis beyond one short word
 
-## Notes for the evaluator
+## Notes for the self-check
 
-When you see a pattern from the "Not blocked" sections, do NOT penalize. The user uses these. The point of calibrating against the real corpus is to avoid over-correcting toward generic professional English.
+Don't rewrite a pattern from the "Not blocked" sections. The user uses these. The point of calibrating against the real corpus is to avoid over-correcting toward generic professional English.
 
-When a draft contains a hard-fail pattern, cite the exact span and the rule it violates. The generator should be able to fix it with a one-word replacement.
+A hard-fail pattern should be fixable with a one-word replacement.

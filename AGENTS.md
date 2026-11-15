@@ -13,7 +13,6 @@ Chu Yeow owns this. Work style: minimal filler; noun-phrases ok; drop grammar; m
 - CI: `gh run list/view` (rerun/fix til green).
 - Prefer end-to-end verification; if blocked, state what’s missing.
 - New deps: check freshness (recent releases/commits) + adoption.
-- Oracle: run `npx -y @steipete/oracle --help` once/session before first use.
 
 ## Important Locations
 
@@ -104,7 +103,7 @@ Scores 1–10, higher = better. Cost = what I actually pay, not list price. Inte
 | gpt-6.1-sol | `codex exec` | 4 | 8 | 5 |
 | sonnet 5.5 | `model: 'sonnet'` | 9 | 5 | 7 |
 | opus 5.5 | `model: 'opus'` | 7 | 8 | 8 |
-| fable 5.1 | `model: 'fable'` | 2 | 9 | 9 |
+| fable 5.2 | `model: 'fable'` | 2 | 9 | 9 |
 
 Rules:
 - Defaults, not limits. Standing permission to escalate without asking when output misses the bar. Judge the output, not the price; escalating beats shipping mediocre work.

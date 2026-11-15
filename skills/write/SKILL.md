@@ -55,7 +55,7 @@ own: `write` is its only reader, `codify-writing` its only writer.
 
 **Resolvable inputs (read when reachable — ask for the path if you don't know it, never hardcode):**
 - **`~/.claude/CLAUDE.md` "Writing style" block** — the source of truth for the base style (en-dashes not em-dashes; plain not flowery; concise not repetitive; Jira em-dash→colon; slides terse). Always available via the global CLAUDE.md / this layer's `AGENTS.md`.
-- **`OPINIONS.md`** — Chu Yeow's catalog of what he actually believes, with a **basis** and **confidence** per line. Read it whenever the piece carries a stance, argument, or position (announcements, strategy notes, leadership comms, anything persuasive). Section **J** is communication/writing/data taste; **N** is people & management; **Q** is working-style defaults. Lives in the `wego-agent` repo — resolve its path once (search `OPINIONS.md`), then reuse. Skip it for a pure logistics ack.
+- **`OPINIONS.md`** — Chu Yeow's catalog of what he actually believes, with a **basis** and **confidence** per line. Read it whenever the piece carries a stance, argument, or position (announcements, strategy notes, leadership comms, anything persuasive). Find the relevant sections by heading. Lives in the `wego-agent` repo — resolve its path once (search `OPINIONS.md`), then reuse. Skip it for a pure logistics ack.
 - **Exemplar corpus** (optional, best signal if present) — `slack-draft`'s `voice/exemplars.private.md` (gitignored, in `wego-agent`), bucketed by register. If reachable, read the bucket matching the target register before drafting. If absent, the bundled rubric + anti-patterns + CLAUDE.md carry the voice.
 
 ## Hard rules

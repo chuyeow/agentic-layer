@@ -5,7 +5,7 @@ and build intuition by poking at it, rather than reading about it. Seymour Paper
 called it "living in Mathland." The insight (Geoffrey Litt): *agents can write bits
 of code that help humans understand other code.*
 
-An explainer (see `explain-diff-html.md`) narrates a change. A micro-world simulates a
+An explainer (the `explain-diff` skill) narrates a change. A micro-world simulates a
 system so you can drive it, break it, and watch it react. Reach for a micro-world when
 the thing to understand is **behavior over time or under different inputs** — a state
 machine, a pipeline, a protocol, a scheduler, a data flow, a lifecycle — not a static
