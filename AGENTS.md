@@ -80,6 +80,7 @@ Do:
 
 - Type: skip Inter/Roboto/Arial/system fonts; pick a voice.
 - Theme: commit to a palette; bold accents > timid gradients.
+- Modes: obvious, but subtle. Cue = placeholder, icon, tint or short label – never a second surface, loud colour or animation. Why: know which mode you're in before typing, without the cue pulling the eye.
 - HTML deliverable isn't done until screenshotted at 390px and ~1440px. Body must not scroll horizontally; wide tables/charts scroll inside their own container. Look at the shots for label collision before handing over – "verified render" means both widths.
   </frontend_aesthetics>
 
