@@ -2,10 +2,9 @@
 name: write
 description: >-
   Write anything in Chu Yeow's voice — Slack messages, emails, announcements,
-  docs, updates, Jira, PR bodies, replies. Single pass: pull his stance from
-  OPINIONS.md, draft in-voice using the extracted slack-draft prompt + rubric and
-  the CLAUDE.md writing-style block, self-check against the AI-slop blocklist, then
-  present. Triggers on "/write", "write X in my voice", "draft an announcement /
+  docs, updates, Jira, PR bodies, replies. Single pass: draft in-voice using
+  the extracted slack-draft prompt + rubric and the CLAUDE.md writing-style
+  block, self-check against the AI-slop blocklist, then present. Triggers on "/write", "write X in my voice", "draft an announcement /
   email / message / update", "help me write", "put this in my words", "reply to
   <thread>". NOT the GAN loop and NOT a poster — it produces text and stops; it
   never sends or posts. For posting a Slack draft, hand off to `slack-draft`.
@@ -20,7 +19,8 @@ for any surface: Slack, email, a company-wide announcement, a doc, a Jira commen
 a PR body, a reply.
 
 Two things make a draft sound like him and not like an assistant: **his voice**
-(how he writes) and **his stance** (what he actually thinks). This skill loads both.
+(how he writes) and **his stance** (what he actually thinks). Voice comes from the
+corpus below; stance comes from the brief or thread he gives you.
 
 ## The loop — how this compounds with `/codify-writing`
 
@@ -55,7 +55,6 @@ own: `write` is its only reader, `codify-writing` its only writer.
 
 **Resolvable inputs (read when reachable — ask for the path if you don't know it, never hardcode):**
 - **`~/.claude/CLAUDE.md` "Writing style" block** — the source of truth for the base style (en-dashes not em-dashes; plain not flowery; concise not repetitive; Jira em-dash→colon; slides terse). Always available via the global CLAUDE.md / this layer's `AGENTS.md`.
-- **`OPINIONS.md`** — Chu Yeow's catalog of what he actually believes, with a **basis** and **confidence** per line. Read it whenever the piece carries a stance, argument, or position (announcements, strategy notes, leadership comms, anything persuasive). Find the relevant sections by heading. Lives in the `wego-agent` repo — resolve its path once (search `OPINIONS.md`), then reuse. Skip it for a pure logistics ack.
 - **Exemplar corpus** (optional, best signal if present) — `slack-draft`'s `voice/exemplars.private.md` (gitignored, in `wego-agent`), bucketed by register. If reachable, read the bucket matching the target register before drafting. If absent, the bundled rubric + anti-patterns + CLAUDE.md carry the voice.
 
 ## Hard rules
@@ -63,7 +62,7 @@ own: `write` is its only reader, `codify-writing` its only writer.
 1. **Never invent facts.** No number, name, link, ticket ID, %, or dollar amount that wasn't given to you. Missing one → placeholder `<X%>` / `<owner>` and surface it. Ask before drafting if a required fact is missing.
 2. **Never auto-send or auto-post.** This skill outputs text and stops. Posting a Slack draft is `slack-draft`'s job; sending email is the user's. Offer the handoff, don't take it.
 3. **Voice over polish.** On-voice-but-rough beats generic-but-clean. Rewrite anything scoring ≤3 on voice-match.
-4. **Stance must be his.** For opinion-bearing pieces, align the argument to `OPINIONS.md`. If the intent pushes a view that **contradicts** a Strong opinion there, stop and flag it — don't quietly write against his own position. Respect `⚑` (sensitive) framing.
+4. **Stance must be his.** For opinion-bearing pieces, argue only positions he gave you in the brief or thread. If the piece needs a position he hasn't stated, ask – don't supply one.
 5. **High-register = show first.** Senior-leadership / company-wide / external pieces are too consequential to treat as routine. Present, note the register, and let him approve before anything leaves.
 6. **Surface-native formatting.** Slack mrkdwn for Slack (`*bold*`, single asterisk; no `#` headers); plain sentences for email/doc; colon-not-dash for Jira; `write-pr-description` structure for PR bodies.
 
@@ -76,13 +75,13 @@ Capture the raw intent, the audience, the surface, and any facts/links/thread gi
 From audience + surface, pick the register on the axis in `voice/rubric.md` (ack / peer / broadcast / senior-leadership / incident) and its natural length. Register drives tone, casing, and sign-off — not the surface alone.
 
 ### 3. Pull substance
-If the piece carries a stance, read the relevant `OPINIONS.md` sections and let his actual positions shape the argument (not just the tone). Note any tension with a Strong/`⚑` opinion for step 5's flag.
+If the piece carries a stance, build the argument from the positions in the brief or thread (not just the tone). Note any position you had to infer for step 5's flag.
 
 ### 4. Draft (one pass)
 Write the piece **as it will appear**, no preamble, no "Here's a draft:". Apply the voice rules below. Read the matching exemplar bucket first if the corpus is reachable — exemplars beat abstract rules where they conflict.
 
 ### 5. Self-check, then present
-Grade your own draft against `voice/rubric.md` and scan for every `anti-patterns.md` hard-fail (em-dashes especially — replace every `—` with `–`). Fix the misses. **Then** present the clean draft. Alongside it, in one or two lines: the register you chose, any placeholder you left, and any stance-tension you flagged. Offer the next step (hand to `slack-draft` to post / save to a file / iterate) — never take it unprompted.
+Grade your own draft against `voice/rubric.md` and scan for every `anti-patterns.md` hard-fail (em-dashes especially — replace every `—` with `–`). Fix the misses. **Then** present the clean draft. Alongside it, in one or two lines: the register you chose, any placeholder you left, and any position you inferred. Offer the next step (hand to `slack-draft` to post / save to a file / iterate) — never take it unprompted.
 
 **If the user edits your draft**, that edit is training data. Suggest running [`/codify-writing`](../codify-writing/SKILL.md) to fold the correction into `voice/` — don't let a real correction evaporate.
 
@@ -113,5 +112,5 @@ A great draft is one Chu Yeow sends verbatim. A passable one survives 1–2 word
 
 - `voice/rubric.md` — quality bar + hard-fail blocklist + register axis (self-check). **Canonical corpus** — written by `/codify-writing`, read here.
 - `voice/anti-patterns.md` — AI-slop blocklist + voice-true patterns to reproduce. Same canonical corpus.
-- Resolvable at runtime: `~/.claude/CLAUDE.md` (writing style), `OPINIONS.md` (stance), `slack-draft/voice/exemplars.private.md` (optional corpus).
+- Resolvable at runtime: `~/.claude/CLAUDE.md` (writing style), `slack-draft/voice/exemplars.private.md` (optional corpus).
 - Sibling: [`../codify-writing/`](../codify-writing/SKILL.md) — the learn half of the loop; harvests your edits into `voice/`.
