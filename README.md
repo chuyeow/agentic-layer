@@ -19,3 +19,12 @@ document.md  ------------>[ ]          [##] [##] [##]   [##] [##]         [ ]<--
                            /    /      /       /
                       AGENTS.md  mcp.json   skills/   (task templates, runbooks, reviews)
 ```
+
+## Claude Code mods
+
+`mods/<name>/` holds Claude Code mods (hooks-module plugins). `./install-configs.sh` symlinks each into `~/.claude/skills/<name>/`, where Claude Code auto-loads and hot-reloads it.
+
+- `highlight-me` – draws your own prompts in a round sunset box under a `★ YOU ★` tag.
+- `compact-diffs` – folds Edit/Write/Bash diffs to a one-line `+n −m` summary; ctrl+o expands one, `/diffs` toggles all. Bind it in `~/.claude/keybindings.json`: `"ctrl+alt+d": "command:diffs"` (Chat context).
+
+Check a mod with `claude plugin validate mods/<name>` and `claude plugin test mods/<name>`.

@@ -9,6 +9,7 @@ Symlink repo `configs/codex/**` into `~/.codex/**` (or `$CODEX_HOME/**`).
 Symlink repo `configs/pi/**` into `~/.pi/agent/**` (or `$PI_CODING_AGENT_DIR/**`).
 Copy repo `skills/**` into `~/.codex/skills/**` (or `$CODEX_HOME/skills/**`).
 Symlink repo `skills/<name>/` dirs into `~/.claude/skills/<name>/`.
+Symlink repo `mods/<name>/` dirs (Claude Code mods) into `~/.claude/skills/<name>/`.
 Copy repo `commands/*.md` into `~/.codex/skills/<name>/SKILL.md` (frontmatter filtered for Codex).
 Symlink repo `commands/*.md` into `~/.claude/commands/*.md`.
 Also symlink repo `AGENTS.md` into `~/.claude/CLAUDE.md`.
@@ -206,6 +207,19 @@ if [[ -d "$src_skills_root" ]]; then
   for src in "${skill_dirs[@]}"; do
     skill_name="$(basename "$src")"
     dst="$claude_skills_root/$skill_name"
+    if ! link_file "$src" "$dst"; then
+      errors=1
+    fi
+  done
+fi
+
+src_mods_root="$repo_root/mods"
+if [[ -d "$src_mods_root" ]]; then
+  claude_skills_root="$HOME/.claude/skills"
+  mkdirp "$claude_skills_root"
+  mapfile -t mod_dirs < <(find "$src_mods_root" -mindepth 1 -maxdepth 1 -type d -print | LC_ALL=C sort)
+  for src in "${mod_dirs[@]}"; do
+    dst="$claude_skills_root/$(basename "$src")"
     if ! link_file "$src" "$dst"; then
       errors=1
     fi

@@ -1,0 +1,1 @@
+{ "name": "compact-diffs", "version": "0.2.0", "description": "Folds Edit/Write/Bash file diffs to a one-line +/- summary; /diffs (ctrl+alt+d) toggles", "types": "./types/index.d.ts" }

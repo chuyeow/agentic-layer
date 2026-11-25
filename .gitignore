@@ -8,3 +8,6 @@ outputs/
 .tmp/verification/
 
 .DS_Store
+
+# Claude Code writes editor types into each loaded mod
+mods/*/.claude-plugin/types/
